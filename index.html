@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generador de Ads Infinitos · Estudio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Bebas+Neue&family=Anton&family=Playfair+Display:ital,wght@0,800;1,700&family=Abril+Fatface&family=DM+Serif+Display&family=Pacifico&family=Permanent+Marker&family=Shrikhand&family=Archivo+Black&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Poppins:wght@500;600;700;800&family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Josefin+Sans:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#FBEDE4; --panel:#FFFBF8; --ink:#2A1620; --ink2:#6E5560; --line:#F0DDD2; --line2:#E2C8BA;
+    --acc:#D9434F; --acc2:#A8306E; --acc-ink:#FFFFFF; --soft:#FBE7DC; --grad:linear-gradient(135deg,#E8553A 0%,#D9434F 45%,#A8306E 100%); --ok:#2F6B4F;
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif; --sans:'Plus Jakarta Sans', Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:var(--sans);background:radial-gradient(1200px 600px at 85% -10%,#F9CDB8 0%,transparent 60%),radial-gradient(900px 500px at -10% 10%,#FCE3D3 0%,transparent 55%),var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
+  button,input,select,textarea{font:inherit;color:inherit}
+  a{color:var(--acc)}
+  /* Top bar */
+  .top{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--line);background:rgba(255,251,248,.86);backdrop-filter:blur(10px);position:sticky;top:0;z-index:5}
+  .brand{display:flex;align-items:center;gap:12px}
+  .mark{width:40px;height:40px;border-radius:50%;background:var(--grad);display:grid;place-items:center}
+  .brand h1{margin:0;font-weight:800;font-size:20px;letter-spacing:-0.02em}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--ink2)}
+  .topact{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+  .count{font-size:13px;color:var(--ink2);padding-right:6px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;color:var(--ink);white-space:nowrap}
+  .btn:hover{border-color:var(--ink)}
+  .btn.primary{background:var(--grad);color:#fff;border:0;box-shadow:0 10px 24px -12px rgba(168,48,110,.6)}
+  .btn.primary:hover{filter:brightness(1.05)}
+  .btn.dark{background:var(--ink);color:#FFF8F0;border-color:var(--ink)}
+  .btn.accent{background:var(--acc);border-color:var(--acc);color:#fff}
+  .btn.accent:hover{filter:brightness(.92)}
+  .btn:disabled{opacity:.55;cursor:wait}
+  .btn.sm{min-height:38px;padding:8px 14px;font-size:13px}
+  .btn svg{flex:none}
+  /* Layout */
+  .studio{display:flex;flex-wrap:wrap;gap:20px;padding:20px 24px;align-items:flex-start}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px}
+  .brief{flex:1 1 280px;max-width:320px;padding:6px 18px 18px;position:sticky;top:84px;max-height:calc(100vh - 100px);overflow:auto}
+  .stage{flex:999 1 420px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:14px;position:sticky;top:84px}
+  .ctrl{flex:1 1 300px;max-width:360px;padding:18px;position:sticky;top:84px;max-height:calc(100vh - 100px);overflow:auto}
+  @media (max-width:1100px){.brief,.stage,.ctrl{position:static;max-height:none}}
+  .post{max-height:calc(100vh - 330px);display:flex;flex-direction:column}
+  .post canvas{flex:1 1 auto;min-height:0;width:auto !important;max-width:100%;max-height:calc(100vh - 470px);object-fit:contain;align-self:center}
+  @media (max-width:1100px){.post,.post canvas{max-height:none}}
+  @media (max-width: 1100px){ .brief,.ctrl{max-width:none} }
+  /* Brief */
+  .sec{border-bottom:1px solid var(--line);padding:14px 0}
+  .sec:last-child{border-bottom:0}
+  .sec > summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);min-height:28px}
+  .sec > summary::-webkit-details-marker{display:none}
+  .sec > summary::after{content:'';width:8px;height:8px;border-right:2px solid var(--ink2);border-bottom:2px solid var(--ink2);transform:rotate(45deg);margin-right:4px;transition:transform .15s}
+  .sec[open] > summary::after{transform:rotate(-135deg)}
+  .fields{display:flex;flex-direction:column;gap:12px;padding-top:12px}
+  .f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600}
+  .f input,.f textarea,.f select{font-weight:400;font-size:14px;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:#fff;min-height:42px;width:100%}
+  .f textarea{resize:vertical;min-height:64px;line-height:1.4}
+  .f input:focus,.f textarea:focus,.f select:focus{outline:2px solid var(--ink);outline-offset:1px;border-color:var(--ink)}
+  .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .hint{font-size:12px;font-weight:400;color:var(--ink2);line-height:1.4}
+  .file{display:flex;align-items:center;gap:10px}
+  .file img{width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid var(--line)}
+  .file input{font-size:12.5px;min-height:auto;padding:8px;border:1px dashed var(--line2);background:var(--soft)}
+  /* Stage */
+  .seg{display:inline-flex;padding:4px;background:var(--soft);border-radius:999px;gap:4px;border:1px solid var(--line)}
+  .seg button{border:0;background:transparent;min-height:36px;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(27,20,24,.12)}
+  .post{width:100%;max-width:470px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 18px 40px -24px rgba(27,20,24,.35)}
+  .post-h{display:flex;align-items:center;gap:10px;padding:10px 12px}
+  .av{width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;overflow:hidden;flex:none}
+  .av img{width:100%;height:100%;object-fit:cover}
+  .post-h b{font-size:13.5px;display:block}
+  .post-h span{font-size:12px;color:var(--ink2)}
+  .post canvas{display:block;width:100%;height:auto;background:var(--soft)}
+  .post-cta{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:#F2F2F2;border-bottom:1px solid #E5E5E5}
+  .post-cta b{font-size:13px;line-height:1.3}
+  .post-cta span{flex:none;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:7px;background:#E3E3E3}
+  .post-c{padding:10px 12px 14px;font-size:13.5px;line-height:1.45}
+  .post-c b{margin-right:6px}
+  .empty{width:100%;max-width:560px;text-align:center;padding:48px 28px}
+  .empty h2{font-weight:800;font-size:28px;line-height:1.15;margin:0 0 10px;letter-spacing:-0.02em}
+  .empty p{color:var(--ink2);line-height:1.55;margin:0 auto 22px;max-width:440px}
+  .status{width:100%;max-width:560px;display:flex;align-items:center;gap:10px;font-size:13.5px;padding:10px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+  .status.err{background:#FBEDE8;border-color:#EFC6B8}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--acc);animation:p 1s infinite alternate;flex:none}
+  @keyframes p{from{opacity:.25}to{opacity:1}}
+  /* Controls */
+  .ctrl h2{margin:0;font-weight:800;font-size:21px;letter-spacing:-0.02em}
+  .meta-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .pill{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
+  .pill.precio{background:#FCE7C8;color:#7A4500}
+  .pill.calidad{background:#E3EFE8;color:#25573F}
+  .pill.urgencia{background:#F9DCD4;color:#8F2A12}
+  .hip{font-size:13px;color:var(--ink2);margin:6px 0 14px;line-height:1.45}
+  .row{display:flex;flex-wrap:wrap;gap:8px}
+  .group{border-top:1px solid var(--line);padding-top:14px;margin-top:14px;display:flex;flex-direction:column;gap:12px}
+  .glab{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+  .styles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .s-po i{background:linear-gradient(180deg,#F7C6D9 45%,#CBBFB3 45%)}
+  .s-po i::after{top:16%;height:10%;background:#2A1620;transform:rotate(-6deg)}
+  .styles button{border:1px solid var(--line2);background:#fff;border-radius:12px;padding:8px 6px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px;font-weight:600;min-height:44px}
+  .styles button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+  .styles i{display:block;width:100%;aspect-ratio:1/1;border-radius:7px;background:#CBBFB3;position:relative;overflow:hidden}
+  .styles i::after{content:'';position:absolute;left:12%;right:12%;height:14%;border-radius:3px;background:#fff}
+  .s-ed i::after{bottom:14%;background:#fff}
+  .s-ed i{background:linear-gradient(180deg,#CBBFB3 40%,#3A2E34)}
+  .s-im i{background:linear-gradient(0deg,#CBBFB3 40%,#3A2E34)}
+  .s-im i::after{top:14%}
+  .s-ta i::after{bottom:8%;left:8%;right:8%;height:34%;background:#FFFDFA}
+  .sw{display:flex;gap:8px}
+  .sw button{width:36px;height:36px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line2);cursor:pointer;padding:0}
+  .sw button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+  .tog{display:flex;align-items:center;justify-content:space-between;font-size:13.5px;font-weight:500;min-height:36px;gap:10px}
+  .tog input{width:20px;height:20px;accent-color:var(--ink)}
+  .upl{position:relative;overflow:hidden}
+  .upl input{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .stick{position:sticky;bottom:0;background:var(--panel);padding-top:14px;margin-top:14px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  /* Filmstrip */
+  .strip{width:100%;padding:14px 16px 12px}
+  .strip-h{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .strip-h h3{margin:0;font-weight:800;font-size:19px;letter-spacing:-0.01em}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line2);background:#fff;border-radius:999px;min-height:36px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--ink);color:#FFF8F0;border-color:var(--ink)}
+  .opt{display:flex;flex-wrap:wrap;gap:6px}
+  .opt button{border:1px solid var(--line2);background:#fff;border-radius:999px;min-height:36px;padding:6px 12px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .opt button[aria-pressed="true"]{background:var(--ink);color:#FFF8F0;border-color:var(--ink)}
+  .opt button b{width:14px;height:14px;border-radius:50%;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+  .checks{display:flex;flex-wrap:wrap;gap:6px}
+  .checks label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:#fff;border-radius:999px;min-height:36px;padding:6px 12px;font-size:12.5px;font-weight:600;cursor:pointer}
+  .checks input,.tog input{accent-color:var(--acc);width:18px !important;height:18px;min-height:0 !important;padding:0 !important;flex:none}
+  /* Hero */
+  .hero{display:flex;flex-wrap:wrap;gap:32px;align-items:center;padding:44px 24px 20px;max-width:1400px;margin:0 auto}
+  .hero-t{flex:1 1 420px}
+  .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid var(--line);font-size:13px;font-weight:700}
+  .hero h2{margin:18px 0 12px;font-size:clamp(40px,6vw,76px);line-height:.98;font-weight:800;letter-spacing:-0.035em}
+  .hero h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{font-size:18px;color:var(--ink2);margin:0 0 22px;max-width:520px;line-height:1.5}
+  .hero .row{align-items:center}
+  .tag{font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px}
+  .collage{flex:1 1 360px;position:relative;min-height:470px;max-width:520px}
+  .collage span{position:absolute;width:46%;aspect-ratio:4/5;border-radius:16px;box-shadow:0 20px 40px -20px rgba(42,22,32,.45);overflow:hidden;background-size:cover;background-position:center}
+  .collage span:nth-child(1){left:6%;top:0;transform:rotate(-7deg);background-color:#F28B7D}
+  .collage span:nth-child(2){left:50%;top:4%;transform:rotate(5deg);background-color:#F7B98B}
+  .collage span:nth-child(3){left:2%;top:42%;transform:rotate(4deg);background-color:#A8D5BA}
+  .collage span:nth-child(4){left:46%;top:46%;transform:rotate(-4deg);background-color:#F6D365}
+  .sec-title{max-width:1400px;margin:8px auto 0;padding:0 24px;display:flex;align-items:baseline;gap:12px}
+  .sec-title h2{margin:0;font-size:24px;font-weight:800;letter-spacing:-0.02em}
+  .sec-title p{margin:0;color:var(--ink2);font-size:14px}
+  .studio,.strip{max-width:1400px;margin-left:auto;margin-right:auto}
+  @media (min-width:1448px){.strip{margin-left:auto;margin-right:auto}}
+  .film{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x proximity}
+  .tlab{flex:none;writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);padding:4px 0;border-left:1px solid var(--line);padding-left:6px;align-self:stretch;display:flex;align-items:center;justify-content:center}
+  .th{flex:none;width:104px;border:0;background:transparent;padding:0;cursor:pointer;text-align:left;scroll-snap-align:start}
+  .th canvas{display:block;width:104px;height:auto;border-radius:10px;background:var(--soft);outline:2px solid transparent;outline-offset:2px;transition:outline-color .12s}
+  .th[aria-current="true"] canvas{outline-color:var(--ink)}
+  .th:hover canvas{outline-color:var(--line2)}
+  .th span{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink2);margin-top:6px}
+  .th i{width:8px;height:8px;border-radius:50%;flex:none}
+  .i-precio{background:#D48A1A}.i-calidad{background:#3F8A63}.i-urgencia{background:#C2410C}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#FFF8F0;padding:12px 18px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;max-width:90vw}
+  .toast.on{opacity:1}
+  .chk{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
+  .chk li{display:flex;gap:8px;align-items:flex-start;line-height:1.35}
+  .chk b{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:#fff}
+  .chk .ok b{background:#2F6B4F}.chk .wa b{background:#C27A0C}
+  dialog.cmp{border:0;border-radius:20px;padding:20px;max-width:min(1100px,96vw);width:100%;background:var(--panel);box-shadow:0 30px 80px -20px rgba(42,22,32,.5)}
+  dialog.cmp::backdrop{background:rgba(42,22,32,.5)}
+  .cmp-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:18px;margin-top:14px}
+  .cmp-g canvas{width:100%;height:auto;border-radius:12px;display:block;max-height:62vh;object-fit:contain}
+  .cmp-g select{width:100%;margin-bottom:8px}
+  .prods{display:flex;flex-direction:column;gap:8px}
+  .prod{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line2);border-radius:12px;background:#fff}
+  .prod img{width:44px;height:44px;object-fit:contain;border-radius:8px;background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/10px 10px;flex:none}
+  .prod input{flex:1;min-width:0;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:8px}
+  .prod button{border:1px solid var(--line2);background:#fff;border-radius:999px;min-height:32px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer}
+  .prod button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .rng{display:grid;grid-template-columns:110px 1fr 44px;align-items:center;gap:8px;font-size:13px;font-weight:600}
+  .rng input{accent-color:var(--acc);width:100%}
+  .rng output{font-size:12px;color:var(--ink2);text-align:right}
+  footer{padding:0 24px 28px;font-size:12px;color:var(--ink2)}
+  table.plan{border-collapse:collapse;width:100%;font-size:12.5px;background:#fff}
+  table.plan th{position:sticky;top:0;background:var(--soft);text-align:left;padding:8px;font-weight:700;white-space:nowrap;z-index:1}
+  table.plan td{padding:6px 8px;border-top:1px solid var(--line);white-space:nowrap}
+  table.plan select{font:inherit;font-size:12.5px;padding:6px 8px;border:1px solid var(--line2);border-radius:8px;background:#fff;min-height:34px;max-width:170px}
+  table.plan select.set{border-color:var(--ink);background:#FFF6EF;font-weight:600}
+  [hidden]{display:none !important}
+
+  /* Vista según plataforma */
+  .tag.plat{cursor:pointer;border:1px solid var(--line2);font:inherit}
+  .tag.plat:hover{transform:translateY(-1px);box-shadow:0 6px 14px -8px rgba(0,0,0,.35)}
+  .post-acts{display:none;gap:16px;padding:8px 12px 0;font-size:20px;line-height:1}
+  .post-acts .sv{margin-left:auto}
+  .post.ig .post-acts{display:flex}
+  .post.ig .post-cta{order:3;background:#fff;border-bottom:0}
+  .post.ig .post-acts{order:4}
+  .post.ig .post-c{order:5}
+  .post.fb .post-h span::after{content:' · 🌐'}
+  .post.fb .post-c{order:1}
+  .post.fb canvas{order:2}
+  .post.fb .post-cta{order:3}
+  .post.fb .post-c > b{display:none}
+  .post.fb .post-cta span{background:#E4E6EB;color:#050505}
+  .post.st{position:relative;background:#111;border-color:#111;max-width:360px;border-radius:22px}
+  .post.st .post-h{color:#fff;padding:16px 14px 10px}
+  .post.st .post-h span{color:rgba(255,255,255,.75)}
+  .post.st::before{content:'';position:absolute;top:7px;left:12px;right:12px;height:3px;border-radius:2px;background:rgba(255,255,255,.55)}
+  .post.st .post-c{display:none}
+  .post.st .post-cta{justify-content:center;background:#111;border:0;padding:10px 0 14px}
+  .post.st .post-cta b{display:none}
+  .post.st .post-cta span{background:#fff;color:#111;border-radius:999px;padding:8px 20px;font-weight:700}
+  .post.st .post-cta span::before{content:'⌃ '}
+  .post.st canvas{border-radius:12px}
+  .styles{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+  .s-ba i{background:linear-gradient(180deg,#F28B7D 42%,#CBBFB3 42%)}
+  .s-ba i::after{top:14%;height:10%;background:#fff}
+  .s-ce i{background:linear-gradient(180deg,#FFFBF8 30%,#CBBFB3 60%)}
+  .s-ce i::after{top:14%;left:22%;right:22%;height:10%;background:#2A1620}
+
+  /* Pasos */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 6px}
+  .steps button{border:1px solid var(--line2);background:#fff;border-radius:12px;padding:8px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font:inherit;font-size:12px;font-weight:700;color:var(--ink2)}
+  .steps button b{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--line);color:var(--ink);font-size:12px}
+  .steps button[aria-current="step"]{border-color:var(--ink);color:var(--ink)}
+  .steps button[aria-current="step"] b{background:var(--ink);color:#FFF8F0}
+  .step-q{background:linear-gradient(135deg,#FFF1E8,#FDE7EF);border-radius:16px;padding:14px 16px;margin:8px 0 14px}
+  .step-q span{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+  .step-q h3{margin:4px 0 2px;font-size:20px;font-weight:800;letter-spacing:-.01em}
+  .step-q p{margin:0}
+  .step-nav .next{min-height:46px;padding:10px 22px;font-size:15px}
+  .steps{grid-template-columns:repeat(6,minmax(0,1fr)) !important;gap:4px !important}
+  .steps button{padding:6px 0 !important;min-width:0}
+  .steps button span{display:none}
+  .steps button b{width:30px !important;height:30px !important;font-size:13px !important}
+  .resumen{display:grid;gap:6px;font-size:13.5px}
+  .resumen div{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;background:#fff;border:1px solid var(--line);border-radius:10px}
+  .resumen div b{color:var(--ink2);font-weight:600}
+  .resumen div span{text-align:right;font-weight:700}
+  .resumen button{border:0;background:none;color:var(--accent,#C2415B);font:inherit;font-weight:700;cursor:pointer;padding:0;margin-left:6px}
+  .step-h{display:flex;align-items:center;gap:10px;margin:4px 0 2px;font-size:17px;font-weight:800}
+  .step-h b{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#FFF8F0;font-size:13px}
+  .step-p{margin:0 0 12px}
+  .step-nav{display:flex;justify-content:space-between;gap:8px;margin-top:16px}
+  .sub{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin-top:6px}
+  .sec.adv > summary{font-size:12px}
+  /* Otro y rueda de colores */
+  .opt button.otro{border-style:dashed}
+  .opt button i.rm{font-style:normal;margin-left:2px;opacity:.6;padding:0 2px}
+  .opt button i.rm:hover{opacity:1}
+  .otro-in{display:flex;gap:6px;width:100%;margin-top:4px}
+  .otro-in input{flex:1;min-width:0;border:1px solid var(--line2);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px}
+  .cw{position:relative;border:1px dashed var(--line2);background:#fff;border-radius:999px;min-height:36px;padding:6px 12px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .cw span.wheel{width:16px;height:16px;border-radius:50%;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)}
+  .cw input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .sw .cw{min-height:34px;padding:4px 10px}
+  /* Pestañas del panel de cada anuncio */
+  .ctabs{display:flex;gap:4px;flex-wrap:wrap;margin:12px 0 4px;padding:4px;background:var(--line);border-radius:12px}
+  .ctabs button{flex:1;border:0;background:none;border-radius:9px;padding:7px 8px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink2)}
+  .ctabs button[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  /* Favoritos */
+  .favs{max-width:1400px;margin:28px auto 40px;padding:0 24px;scroll-margin-top:80px}
+  .favs-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .favs-h h2{margin:0;font-size:24px;font-weight:800}
+  .favs-h p{margin:4px 0 0;color:var(--ink2);font-size:14px}
+  .favs-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+  .fcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px}
+  .fcard canvas{width:100%;height:auto;border-radius:10px;display:block;cursor:pointer}
+  .fcard b{font-size:13px}
+  .fcard .row{gap:6px}
+  .favs-empty{border:1px dashed var(--line2);border-radius:16px;padding:28px;text-align:center;color:var(--ink2);grid-column:1/-1}
+  #favN{background:var(--ink);color:#FFF8F0;border-radius:999px;padding:0 7px;font-size:11px;margin-left:4px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></div>
+    <div><h1>Ads Infinitos</h1><p>Generador de anuncios con IA para Meta Ads</p></div>
+  </div>
+  <div class="topact">
+    <a class="btn sm" href="#favs" id="btnFavTop">★ Mis favoritos <span id="favN">0</span></a>
+    <button class="btn sm" id="btnCsv" type="button">Exportar textos (CSV)</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-t">
+    <h2>Generador de Ads <em>Infinitos</em></h2>
+    <p>Contale a la IA qué vendés, elegí el estilo y generá anuncios distintos en minutos: foto, texto y diseño. Si uno no te gusta, pedís otro.</p>
+    <div class="row">
+      <a class="btn primary" href="#estudio" style="min-height:52px;padding:12px 30px;font-size:16px">Empezar</a>
+      <button type="button" class="tag plat" data-goto="4:5" style="background:#FCE7B5">Instagram</button>
+      <button type="button" class="tag plat" data-goto="1:1" style="background:#CFE9D8">Facebook</button>
+      <button type="button" class="tag plat" data-goto="9:16" style="background:#FFF">Historias</button>
+    </div>
+  </div>
+  <div class="collage" id="collage" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+</section>
+
+<div class="sec-title" id="estudio"><h2>Estudio</h2><p>Completá los 4 pasos, generá y ajustá cada anuncio</p></div>
+
+<div class="studio">
+  <!-- OPCIONES DE LA EMPRESA -->
+  <aside class="panel brief" aria-label="Opciones del anuncio">
+    <form id="f" autocomplete="off">
+      <nav class="steps" aria-label="Pasos">
+        <button type="button" data-go="1" aria-current="step"><b>1</b><span>Producto</span></button>
+        <button type="button" data-go="2"><b>2</b><span>Mensaje</span></button>
+        <button type="button" data-go="3"><b>3</b><span>Foto</span></button>
+        <button type="button" data-go="4"><b>4</b><span>Personas</span></button>
+        <button type="button" data-go="5"><b>5</b><span>Diseño</span></button>
+        <button type="button" data-go="6"><b>6</b><span>Listo</span></button>
+      </nav>
+      <section class="sec step" data-step="1" aria-label="Paso 1: Producto">
+        <div class="step-q"><span>Paso 1 de 6</span><h3>¿Qué vas a anunciar?</h3><p class="hint">Contanos el producto, el precio y subí su foto.</p></div>
+        <div class="fields">
+          <label class="f">Cuenta de la tienda<input name="tienda" value="@tutienda.uy"></label>
+          <div class="two">
+            <label class="f">Marca<input name="marca" value="Salon Line"></label>
+            <label class="f">Tamaño<input name="tam" value="1 kg"></label>
+          </div>
+          <label class="f">Producto<input name="producto" value="Crema para peinar Definición Intensa"></label>
+          <div class="two">
+            <label class="f">Precio de lista ($)<input name="lista" inputmode="numeric" value="790"></label>
+            <label class="f">Precio oferta ($)<input name="oferta" inputmode="numeric" value="590"></label>
+          </div>
+          <div class="two">
+            <label class="f">Combo x2 ($)<input name="combo" inputmode="numeric" value="1090"></label>
+            <label class="f">Usos por envase<input name="usos" inputmode="numeric" value="25"></label>
+          </div>
+          <div class="f" style="gap:8px"><span>Productos <span class="hint">subí uno o varios (ideal: fondo blanco liso o PNG sin fondo). Cada anuncio puede usar otro.</span></span>
+            <div id="prodList" class="prods"></div>
+            <label class="btn sm upl" style="align-self:flex-start">+ Agregar producto<input type="file" id="prodFile" accept="image/*" multiple></label>
+          </div>
+          <div class="f" style="gap:8px"><span>Cómo aparece el producto en la foto</span><div class="opt" data-opt="prodModo"></div></div>
+          <label class="f">Beneficios <span class="hint">separados por coma</span><input name="beneficios" value="Define cada rulo, Hidrata sin apelmazar, Controla el frizz"></label>
+        </div>
+        <div class="step-nav"><span></span><button class="btn primary next" type="button" data-go="2" aria-label="Siguiente">Seguir →</button></div>
+      </section>
+      <section class="sec step" data-step="2" aria-label="Paso 2: Mensaje" hidden>
+        <div class="step-q"><span>Paso 2 de 6</span><h3>¿Qué querés comunicar?</h3><p class="hint">Elegí qué probar y quién escribe los textos.</p></div>
+        <div class="fields">
+          <div class="f" style="gap:8px"><span>Enfoques a probar</span>
+            <div class="checks" id="enfoques">
+              <label><input type="checkbox" value="precio" checked>Precio</label>
+              <label><input type="checkbox" value="calidad" checked>Calidad</label>
+              <label><input type="checkbox" value="urgencia" checked>Urgencia</label>
+            </div>
+          </div>
+          <div class="f" style="gap:8px"><span>¿Quién escribe los textos?</span><div class="opt" data-opt="textos"></div></div>
+          <div class="fields" id="manual" hidden style="padding:12px;border:1px dashed var(--line2);border-radius:12px;background:#fff">
+            <label class="f">Titular<input name="m_h" value="Rulos definidos todo el día"></label>
+            <label class="f">Bajada<input name="m_s" value="Crema para peinar Salon Line de 1 kg."></label>
+            <div class="two"><label class="f">Etiqueta<input name="m_tag" value="Nuevo"></label><label class="f">Botón en la imagen<input name="m_cta" value="Comprar ahora"></label></div>
+            <label class="f">Texto principal (Meta)<textarea name="m_primary" rows="2">Rulos definidos, con brillo y sin frizz. Crema para peinar Salon Line de 1 kg.</textarea></label>
+            <label class="f">Título (Meta)<input name="m_title" value="Rulos definidos todo el día"></label>
+            <label class="f">Botón debajo del anuncio <span class="hint">el que Instagram y Facebook ponen abajo de la foto; Meta solo deja elegir de esta lista</span><select name="m_button"><option>Comprar</option><option>Más información</option><option>Pedir ahora</option><option>Enviar mensaje de WhatsApp</option></select></label>
+            <p class="hint" style="margin:0">Se crean varios anuncios con tu texto, cada uno con otra foto y otro diseño, para probar qué imagen funciona mejor.</p>
+          </div>
+          <div class="f" style="gap:8px" id="tonoBox"><span>Tono</span><div class="opt" data-opt="tono"></div></div>
+          <div class="f" style="gap:8px"><span>Anuncios por tanda</span><div class="opt" data-opt="cantidad"></div></div>
+          <label class="f">Público<input name="publico" value="Mujeres de 18 a 45 años con rulos u ondas, en Uruguay"></label>
+          <div class="two">
+            <label class="f">Promo termina <span class="hint">vacío = sin promo</span><input name="fin" value="el domingo 23:59"></label>
+            <label class="f">Cupo de pedidos<input name="cupo" inputmode="numeric" value="50"></label>
+          </div>
+        </div>
+        <div class="step-nav"><button class="btn sm" type="button" data-go="1">← Atrás</button><button class="btn primary next" type="button" data-go="3" aria-label="Siguiente">Seguir →</button></div>
+      </section>
+      <section class="sec step" data-step="3" aria-label="Paso 3: Foto" hidden>
+        <div class="step-q"><span>Paso 3 de 6</span><h3>¿Cómo querés la foto?</h3><p class="hint">La IA crea una foto nueva para cada anuncio.</p></div>
+        <div class="fields">
+          <div class="sub">La foto</div>
+          <div class="f" style="gap:8px"><span>Tipo de foto</span><div class="opt" data-opt="tipofoto"></div><span class="hint">"Variado" reparte distintos tipos de foto en cada tanda. Después podés cambiar cada anuncio.</span></div>
+          <div class="f" style="gap:8px"><span>Escena</span><div class="opt" data-opt="escena"></div></div>
+          <div class="f" style="gap:8px"><span>Color de fondo</span><div class="opt" data-opt="fondo"></div></div>
+          <div class="f" style="gap:8px"><span>Estilo de foto</span><div class="opt" data-opt="foto"></div></div>
+          <div class="f" style="gap:8px"><span>Si no subiste tu producto</span><div class="opt" data-opt="pote"></div></div>
+        </div>
+        <div class="step-nav"><button class="btn sm" type="button" data-go="2">← Atrás</button><button class="btn primary next" type="button" data-go="4" aria-label="Siguiente">Seguir →</button></div>
+      </section>
+      <section class="sec step" data-step="4" aria-label="Paso 4: Personas" hidden>
+        <div class="step-q"><span>Paso 4 de 6</span><h3>¿Quiénes aparecen en la foto?</h3><p class="hint">Si la foto no lleva personas, podés saltear este paso.</p></div>
+                  <div class="fields" id="genBox">
+            
+            <div class="f" style="gap:8px"><span>Quiénes aparecen</span><div class="opt" data-opt="genero"></div></div>
+            <div class="f" style="gap:8px"><span>Cuántas personas</span><div class="opt" data-opt="personas"></div></div>
+            <div class="f" style="gap:8px"><span>Edad</span><div class="opt" data-opt="edad"></div></div>
+            <div class="f" style="gap:8px"><span>Tipo de rulo</span><div class="opt" data-opt="rulo"></div></div>
+            <div class="f" style="gap:8px"><span>Tono de piel</span><div class="opt" data-opt="piel"></div></div>
+          </div>
+        
+        <div class="step-nav"><button class="btn sm" type="button" data-go="3">← Atrás</button><button class="btn primary next" type="button" data-go="5" aria-label="Siguiente">Seguir →</button></div>
+      </section>
+      <section class="sec step" data-step="5" aria-label="Paso 5: Diseño" hidden>
+        <div class="step-q"><span>Paso 5 de 6</span><h3>¿Cómo querés que se vea?</h3><p class="hint">Estilo, letra y colores de los anuncios.</p></div>
+        <div class="fields">
+          <div class="f" style="gap:8px"><span>Estilo del texto</span><div class="opt" data-opt="layout"></div></div>
+          <div class="f" style="gap:8px"><span>Tipografía</span><div class="opt" data-opt="tipo"></div></div>
+          <div class="f" style="gap:8px"><span>Color de marca</span><div class="opt" data-opt="acento"></div></div>
+          <label class="f">Logo <span class="hint">opcional, va arriba a la izquierda</span>
+            <span class="file"><input type="file" name="logo" accept="image/*"><img id="thumbLogo" alt="" hidden></span>
+          </label>
+        </div>
+        <div class="step-nav"><button class="btn sm" type="button" data-go="4">← Atrás</button><button class="btn primary next" type="button" data-go="6" aria-label="Siguiente">Seguir →</button></div>
+      </section>
+      <section class="sec step" data-step="6" aria-label="Paso 6: Listo" hidden>
+        <div class="step-q"><span>Paso 6 de 6</span><h3>¡Todo listo!</h3><p class="hint">Revisá lo que elegiste y generá tus anuncios.</p></div>
+        <div class="resumen" id="resumen"></div>
+        <div id="genArea"></div>
+        <div class="step-nav"><button class="btn sm" type="button" data-go="5">← Atrás</button><span></span></div>
+      </section>
+
+      <details class="sec adv" id="secAdv"><summary>⚙ Ajustes</summary>
+        <div class="fields">
+          <div id="keyBox" hidden><input id="pkey" type="hidden"><button id="btnTest" type="button" hidden></button><div id="testOut" hidden></div></div>
+          <p class="status" id="srvOk" hidden style="margin:0"></p>
+          <div class="f" style="gap:8px"><span>Forma de integrar el producto a la foto</span><div class="opt" data-opt="modeloInt"></div><span class="hint">Si una da error o el producto sale raro, probá otra.</span></div>
+          <button class="btn sm" id="btnReset" type="button">Borrar todo y empezar de cero</button>
+        </div>
+      </details>
+    </form>
+    <button class="btn" id="btnPlan" type="button" style="width:100%;margin-top:14px;min-height:46px">Elegir opciones para cada anuncio</button>
+    <p class="hint" id="planInfo" style="margin:6px 2px 0;text-align:center"></p>
+    <button class="btn primary" id="btnGen" type="button" style="width:100%;margin-top:10px;min-height:50px;font-size:15px">Generar anuncios con IA</button>
+    <button class="btn sm" id="btnStop" type="button" hidden style="width:100%;margin-top:8px">Detener</button>
+  </aside>
+
+  <!-- VISTA PREVIA -->
+  <section class="stage" aria-label="Vista previa">
+    <div class="seg" role="group" aria-label="Formato" id="fmt">
+      <button type="button" data-f="4:5" aria-pressed="false">Instagram · 4:5</button>
+      <button type="button" data-f="1:1" aria-pressed="true">Facebook · 1:1</button>
+      <button type="button" data-f="9:16" aria-pressed="false">Historias · 9:16</button>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+    <div class="panel empty" id="empty">
+      <h2>Tu primer anuncio está a un clic</h2>
+      <p>Elegí las opciones a la izquierda y tocá "Generar anuncios con IA" (abajo del panel). La IA escribe los textos y crea una foto distinta para cada anuncio.</p>
+    </div>
+    <article class="post ig" id="post" hidden>
+      <div class="post-h"><div class="av" id="av"></div><div><b id="pHandle"></b><span>Publicidad</span></div></div>
+      <canvas id="cv" width="1080" height="1080" role="img" aria-label="Vista previa del anuncio"></canvas>
+      <div class="post-acts" aria-hidden="true"><span>♡</span><span>💬</span><span>➤</span><span class="sv">🔖</span></div>
+      <div class="post-cta"><b id="pTitle"></b><span id="pBtn"></span></div>
+      <div class="post-c"><b id="pHandle2"></b><span id="pText"></span></div>
+    </article>
+<section class="panel strip" id="strip" hidden>
+  <div class="strip-h">
+    <h3>Variaciones</h3>
+    <div class="chips" role="group" aria-label="Filtrar por enfoque">
+      <button class="chip" type="button" data-fil="todos" aria-pressed="true">Todos</button>
+      <button class="chip" type="button" data-fil="precio" aria-pressed="false">Precio</button>
+      <button class="chip" type="button" data-fil="calidad" aria-pressed="false">Calidad</button>
+      <button class="chip" type="button" data-fil="urgencia" aria-pressed="false">Urgencia</button>
+      <button class="chip" type="button" data-fil="fav" aria-pressed="false">★ Favoritos</button>
+    </div>
+    <div class="row"><button class="btn sm" type="button" id="btnCmp">Comparar A/B</button><button class="btn sm" type="button" id="btnZip">Descargar ZIP</button><button class="btn sm" type="button" id="btnDlFav">Descargar favoritos</button></div>
+  </div>
+  <div class="film" id="film"></div>
+</section>
+  </section>
+
+  <!-- CONTROLES DEL ANUNCIO -->
+  <aside class="panel ctrl" id="ctrl" aria-label="Editar anuncio" hidden></aside>
+</div>
+
+<section class="favs" id="favs">
+  <div class="favs-h">
+    <div><h2>★ Mis favoritos</h2><p>Los anuncios que marcás con la estrella quedan guardados acá, listos para descargar o comparar.</p></div>
+    <div class="row"><button class="btn sm" type="button" id="btnFavCmp">Comparar A/B</button><button class="btn sm dark" type="button" id="btnFavDl">Descargar todos</button></div>
+  </div>
+  <div class="favs-g" id="favsG"></div>
+</section>
+
+
+
+<dialog class="cmp" id="planDlg" aria-label="Plan de la tanda" style="max-width:min(1400px,98vw)">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h3 style="margin:0;font-size:22px;font-weight:800">Plan de la tanda: elegí cada anuncio</h3><button class="btn sm" type="button" id="planClose">Cerrar</button></div>
+  <p class="hint" style="margin:6px 0 10px">Una fila por anuncio. Lo que dejes en <b>General</b> usa las opciones del panel izquierdo (o lo varía la app). Lo que elijas acá se aplica solo a ese anuncio.</p>
+  <div class="row" style="align-items:center;margin-bottom:10px"><label class="tog" style="gap:8px;min-height:auto"><input type="checkbox" id="planOn"> Usar este plan al generar</label><button class="btn sm" type="button" id="planCopy">Copiar la fila 1 a todas</button><button class="btn sm" type="button" id="planClear">Todo en General</button></div>
+  <div style="overflow:auto;max-height:62vh;border:1px solid var(--line);border-radius:12px"><table class="plan" id="planTable"></table></div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" type="button" id="planGo">Generar con este plan</button></div>
+</dialog>
+<dialog class="cmp" id="cmp" aria-label="Comparar anuncios">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h3 style="margin:0;font-size:20px;font-weight:800">Comparar A/B</h3><button class="btn sm" type="button" id="cmpClose">Cerrar</button></div>
+  <p class="hint" style="margin:6px 0 0">Elegí dos anuncios para verlos lado a lado, como los va a ver tu cliente en Meta. Ideal para decidir cuáles subir al test.</p>
+  <div class="cmp-g"><div><select class="f" id="cmpA"></select><canvas id="cmpCvA" width="540" height="540"></canvas><p class="hint" id="cmpTA"></p></div><div><select class="f" id="cmpB"></select><canvas id="cmpCvB" width="540" height="540"></canvas><p class="hint" id="cmpTB"></p></div></div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  const $ = s => document.querySelector(s), $$ = s => Array.from(document.querySelectorAll(s));
+  const form = $('#f');
+  let prods = [], prodDef = null; const prodImgs = {};
+  const prodOf = a => { const id = (a && a.prodId) || prodDef; return (id && prodImgs[id]) || (prodDef && prodImgs[prodDef]) || null; };
+  let ads = [], sel = null, formato = '9:16', filtro = 'todos', tandas = 0, busy = null, logo = null;
+  const FORMATOS = {'1:1':{h:1080, iw:768, ih:768}, '4:5':{h:1350, iw:688, ih:860}, '9:16':{h:1920, iw:576, ih:1024}};
+
+  // ---------- Opciones que elige la empresa ----------
+  const FONTS = {
+    caveat:{n:'A mano', f:"'Caveat Brush'", w:400, k:1.05, b:"'DM Sans'"},
+    bebas:{n:'Bebas', f:"'Bebas Neue'", w:400, k:1.3, up:true, b:"'Montserrat'"},
+    playfair:{n:'Playfair', f:"'Playfair Display'", w:800, k:.95, b:"'Lora'"},
+    moderna:{n:'Moderna', f:"'Plus Jakarta Sans'", w:800, k:.95, b:"'Plus Jakarta Sans'"},
+    pacifico:{n:'Pacifico', f:'Pacifico', w:400, k:.82, b:"'Poppins'"},
+    anton:{n:'Anton', f:'Anton', w:400, k:1.1, up:true, b:"'Space Grotesk'"},
+    dmserif:{n:'DM Serif', f:"'DM Serif Display'", w:400, k:1.05, b:"'DM Sans'"},
+    marker:{n:'Marker', f:"'Permanent Marker'", w:400, k:.88, b:"'Poppins'"},
+    abril:{n:'Abril', f:"'Abril Fatface'", w:400, k:.98, b:"'Lora'"},
+    archivo:{n:'Archivo Black', f:"'Archivo Black'", w:400, k:.9, up:true, b:"'Montserrat'"},
+    shrikhand:{n:'Shrikhand', f:'Shrikhand', w:400, k:.85, b:"'Josefin Sans'"},
+    elegante:{n:'Fraunces', f:'Fraunces', w:600, k:1, b:"'Josefin Sans'"}
+  };
+  const FONT_KEYS = Object.keys(FONTS);
+  const bodyFont = a => `${(FONTS[a.font] || FONTS.moderna).b}, 'Plus Jakarta Sans', Inter, system-ui, sans-serif`;
+  const fontFn = a => { const F = FONTS[a.font] || FONTS.moderna; return s => `${F.w} ${s}px ${F.f}, 'Plus Jakarta Sans', sans-serif`; };
+  const fontTxt = (a, t) => (FONTS[a.font] || {}).up ? String(t).toUpperCase() : t;
+  const fontK = a => (FONTS[a.font] || {}).k || 1;
+  const fontFor = (i, tanda) => opt.tipo && opt.tipo !== 'variada' ? opt.tipo : FONT_KEYS[(i * 5 + tanda * 3) % FONT_KEYS.length];
+  const OPTS = {
+    tono: {def:'cercano', items:[['cercano','Cercano'],['divertido','Divertido'],['elegante','Elegante'],['directo','Directo']]},
+    cantidad: {def:'10', items:[['5','5'],['10','10']]},
+    textos: {def:'ia', items:[['ia','Que lo escriba la IA'],['yo','Lo escribo yo']]},
+    tipofoto: {def:'variado', items:[['variado','Variado (recomendado)'],['modelo','Modelo con rulos'],['producto','Producto protagonista'],['antesdespues','Antes y después'],['rulos','Detalle de rulos'],['textura','Textura de la crema'],['manos','Manos aplicando'],['flatlay','Vista desde arriba']]},
+    escena: {def:'variado', items:[['variado','Variada'],['color','Estudio de color'],['flores','Flores y frutas'],['bano','Baño luminoso'],['ciudad','Calle de Montevideo'],['playa','Playa'],['amigas','Con amigos']]},
+    fondo: {def:'variado', items:[['variado','Variado'],['rosa','Rosa'],['celeste','Celeste'],['coral','Coral'],['durazno','Durazno'],['menta','Menta'],['amarillo','Amarillo'],['lila','Lila'],['crema','Crema']]},
+    foto: {def:'editorial', items:[['editorial','Editorial de belleza'],['natural','Natural'],['minimal','Minimalista']]},
+    edad: {def:'variada', items:[['variada','Variada'],['18-25','18 a 25'],['26-35','26 a 35'],['36-45','36 a 45']]},
+    rulo: {def:'variado', items:[['variado','Variado'],['ondas','Ondas'],['rulos','Rulos'],['afro','Afro / coily']]},
+    piel: {def:'variado', items:[['variado','Variado'],['clara','Clara'],['trigueña','Trigueña'],['morena','Morena'],['negra','Negra']]},
+    genero: {def:'mujer', items:[['mujer','Mujeres'],['hombre','Hombres'],['mixto','Mujeres y hombres'],['variado','Variado']]},
+    personas: {def:'una', items:[['una','Una persona'],['dos','Dos personas']]},
+    prodModo: {def:'mano', items:[['mano','La IA lo pone en la mano'],['apoyado','La IA lo apoya en la escena'],['pegar','Pegarlo encima (recortado)']]},
+    modeloInt: {def:'kontext', items:[['kontext','Opción 1 (recomendada)'],['klein','Opción 2'],['gptimage','Opción 3']]},
+    pote: {def:'si', items:[['si','La IA dibuja un pote genérico'],['no','Sin pote']]},
+    layout: {def:'auto', items:[['auto','Variado (recomendado)'],['pop','Marcador'],['banda','Banda de color'],['editorial','Editorial'],['centrado','Centrado'],['impacto','Impacto'],['tarjeta','Tarjeta']]},
+    tipo: {def:'variada', items:[['variada','Variada (recomendado)']].concat(FONT_KEYS.map(k => [k, FONTS[k].n]))},
+    acento: {def:'#D9434F', items:[['#D9434F','Coral'],['#A8306E','Fucsia'],['#E8553A','Naranja'],['#2F6B4F','Verde'],['#2A1620','Negro'],['#6B4FA0','Violeta']]}
+  };
+  const FONDOS = {rosa:['#F7C6D9','soft pastel pink'], celeste:['#CFE3F5','pastel baby blue'], coral:['#F28B7D','soft coral'], durazno:['#F7B98B','warm peach'], menta:['#A8D5BA','mint green'], amarillo:['#F6D365','sunny yellow'], lila:['#C9B6E4','lilac'], crema:['#F3E6D8','warm cream']};
+  const opt = {};
+  Object.keys(OPTS).forEach(k => opt[k] = OPTS[k].def);
+  // Opciones propias ("Otro…") y colores elegidos con la rueda
+  const OTRO = {tono:'Ej.: inspirador', edad:'Ej.: 50 a 60 años'};
+  const custom = {};
+  const isX = v => typeof v === 'string' && v.startsWith('x:');
+  const xTxt = v => String(v).slice(2);
+  function addCustom(k, v, quiet){
+    if (!OPTS[k] || OPTS[k].items.some(([x]) => x === v)) return;
+    const label = isX(v) ? xTxt(v) : 'Mi color';
+    OPTS[k].items.push([v, label]); custom[k] = custom[k] || []; if (!custom[k].includes(v)) custom[k].push(v);
+    if (!quiet) persist();
+  }
+  function rmCustom(k, v){
+    OPTS[k].items = OPTS[k].items.filter(([x]) => x !== v); custom[k] = (custom[k] || []).filter(x => x !== v);
+    if (opt[k] === v) opt[k] = OPTS[k].def; persist();
+  }
+  function hexName(hex){
+    const n = parseInt(String(hex).slice(1), 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn, sat = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+    let h = 0; if (d){ h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + 360) % 360; }
+    if (sat < .12) return l > .85 ? 'white' : l > .6 ? 'light gray' : l > .3 ? 'gray' : 'black';
+    const names = [[15,'red'],[40,'orange'],[65,'yellow'],[90,'lime green'],[150,'green'],[185,'teal'],[205,'sky blue'],[250,'blue'],[285,'purple'],[330,'pink'],[361,'red']];
+    const nm = names.find(([t]) => h < t)[1], tone = l > .78 ? 'pastel ' : l > .62 ? 'light ' : l < .3 ? 'deep dark ' : '';
+    return tone + nm;
+  }
+  const fondoInfo = (v, strict) => FONDOS[v] ? FONDOS[v] : /^#[0-9a-f]{6}$/i.test(v || '') ? [v, hexName(v)] : strict ? null : FONDOS.coral;
+  // Género de la foto (mujer, hombre o los dos)
+  function genderOf(a){
+    const o = a.op || opt, s = a.seed || 0, g = o.genero || 'mujer';
+    const gg = g === 'variado' ? ['mujer','hombre','mujer','mixto'][(s >> 11) % 4] : g;
+    if (gg === 'mixto' && o.personas !== 'dos') return (s >> 13) % 2 ? 'hombre' : 'mujer';
+    return gg;
+  }
+  function renderOpts(){
+    $$('[data-opt]').forEach(box => {
+      const k = box.dataset.opt, o = OPTS[k];
+      box.innerHTML = o.items.map(([v, n]) => {
+        const fi = k === 'fondo' ? fondoInfo(v, true) : null;
+        const dot = fi ? `<b style="background:${fi[0]}"></b>` : k === 'acento' ? `<b style="background:${v}"></b>` : '';
+        const rm = (custom[k] || []).includes(v) ? `<i class="rm" data-rm="${esc(v)}" title="Quitar">×</i>` : '';
+        return `<button type="button" data-v="${esc(v)}" aria-pressed="${opt[k] === v}">${dot}${esc(n)}${rm}</button>`;
+      }).join('')
+      + (k === 'acento' || k === 'fondo' ? `<label class="cw" title="Elegir cualquier color"><span class="wheel"></span>Otro color<input type="color" data-cw="${k}" value="${/^#/.test(opt[k]) ? opt[k] : '#7A5AF8'}"></label>` : '')
+      + (OTRO[k] ? `<button type="button" class="otro" data-otro="${k}">+ Otro</button>` : '');
+      box.querySelectorAll('button[data-v]').forEach(b => b.onclick = e => {
+        if (e.target.dataset.rm){ rmCustom(k, e.target.dataset.rm); renderOpts(); return; }
+        opt[k] = b.dataset.v; renderOpts(); persist(); if (k === 'acento' || k === 'tipo' || k === 'layout') applyDesignToAll(k);
+      });
+      const cw = box.querySelector('[data-cw]');
+      if (cw) cw.onchange = () => { const v = cw.value.toLowerCase(); addCustom(k, v); opt[k] = v; renderOpts(); persist(); if (k === 'acento') applyDesignToAll(k); toast('Color agregado'); };
+      const ot = box.querySelector('[data-otro]');
+      if (ot) ot.onclick = () => {
+        ot.outerHTML = `<div class="otro-in"><input type="text" maxlength="40" placeholder="${OTRO[k]}" aria-label="Escribí otra opción"><button type="button" class="btn sm dark" data-add>Agregar</button></div>`;
+        const inp = box.querySelector('.otro-in input'), add = () => { const t = inp.value.trim(); if (!t) { renderOpts(); return; } const v = 'x:' + t; addCustom(k, v); opt[k] = v; renderOpts(); persist(); toast('Opción agregada: ' + t); };
+        box.querySelector('[data-add]').onclick = add; inp.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); add(); } if (e.key === 'Escape') renderOpts(); }; inp.focus();
+      };
+    });
+    const man = opt.textos === 'yo'; $('#manual').hidden = !man; $('#tonoBox').hidden = man;
+    const gb = $('#genBox'); if (gb) gb.hidden = !['variado','modelo'].includes(opt.tipofoto);
+    { const b = $('#btnGen'); if (b && !busy) b.textContent = man ? 'Generar anuncios con mi texto' : (ads.length ? 'Generar más anuncios' : 'Generar anuncios con IA'); }
+  }
+  function applyDesignToAll(k){
+    // Cambios de diseño globales se aplican a todos los anuncios que no fueron tocados a mano en ese aspecto
+    ads.forEach(a => {
+      if (k === 'acento' && !a.accLocked) a.acc = opt.acento;
+      if (k === 'tipo' && !a.fontLocked) a.font = fontFor(ads.indexOf(a), a.tanda || 0);
+      if (k === 'layout' && opt.layout !== 'auto' && !a.layoutLocked) a.layout = opt.layout;
+    });
+    renderAll();
+  }
+  const num = v => { const n = Number(String(v).replace(/[^\d.,]/g,'').replace(/\./g,'').replace(',','.')); return isFinite(n) && n > 0 ? n : null; };
+  const money = n => n == null ? '[precio]' : '$\u00A0' + Math.round(n).toLocaleString('es-UY');
+  const or = (v, ph) => (v && String(v).trim()) ? String(v).trim() : ph;
+
+  function data(){
+    const fd = new FormData(form);
+    const g = k => fd.get(k) || '';
+    const L = num(g('lista')), O = num(g('oferta')), C = num(g('combo')), U = num(g('usos'));
+    const pct = (L && O && O < L) ? Math.round((1 - O / L) * 100) : null;
+    return {
+      tienda: or(g('tienda'), '@[tutienda]'), marca: or(g('marca'), '[marca]'), producto: or(g('producto'), '[producto]'), tam: or(g('tam'), ''),
+      L: money(L), O: money(O), combo: money(C), usos: U ? Math.round(U) : '[usos]',
+      pct: pct == null ? '[%]' : pct, ahorro: (L && O && O < L) ? money(L - O) : '[ahorro]',
+      cpu: (O && U) ? money(Math.ceil(O / U)) : '[$ por uso]',
+      beneficios: or(g('beneficios'), '[beneficio 1], [beneficio 2], [beneficio 3]').split(',').map(s => s.trim()).filter(Boolean).slice(0,3),
+      fin: or(g('fin'), '[cuándo termina]'), cupo: or(g('cupo'), '[N]')
+    };
+  }
+
+  const SLOTS = [
+    {id:'A1', enfoque:'precio', nombre:'Precio directo', kind:'price', v:[
+      d => ({tag:'Precio · -'+d.pct+'%', h:'Rulos definidos por '+d.O, s:d.producto+' '+d.tam+'.', cta:'Comprar ahora',
+             primary:'¿Rulos definidos sin gastar de más? '+d.marca+' '+d.producto+' '+d.tam+' a '+d.O+' (antes '+d.L+').', title:'Rulos definidos por '+d.O, button:'Comprar'}),
+      d => ({tag:'Precio · oferta', h:d.pct+'% OFF en tu crema de rulos', s:'De '+d.L+' a '+d.O+'. '+d.marca+' original.', cta:'Lo quiero',
+             primary:d.pct+'% OFF en '+d.marca+' '+d.producto+'. Pasá de '+d.L+' a '+d.O+'.', title:d.pct+'% OFF en '+d.marca, button:'Comprar'}),
+      d => ({tag:'Precio · ahorro', h:'Ahorrate '+d.ahorro+' en tus rulos', s:d.producto+' '+d.tam+' a '+d.O+'.', cta:'Comprar ahora',
+             primary:'Misma crema, '+d.ahorro+' menos. '+d.marca+' '+d.producto+' '+d.tam+' a '+d.O+'.', title:'Ahorrate '+d.ahorro, button:'Comprar'})
+    ], hip:'Un descuento claro alcanza para decidir la compra.'},
+    {id:'A2', enfoque:'precio', nombre:'Precio por uso', kind:'none', v:[
+      d => ({tag:'Precio · rendimiento', h:'Menos de '+d.cpu+' por lavado', s:'Un envase de '+d.tam+' rinde unas '+d.usos+' aplicaciones.', cta:'Ver precio',
+             primary:'Un pote de '+d.tam+' rinde unas '+d.usos+' aplicaciones: menos de '+d.cpu+' por lavado. Hacé la cuenta.', title:'Menos de '+d.cpu+' por lavado', button:'Más información'}),
+      d => ({tag:'Precio · rendimiento', h:d.usos+' lavados en un solo pote', s:'Sale '+d.cpu+' por uso. Hacé la cuenta.', cta:'Ver precio',
+             primary:d.marca+' '+d.producto+' '+d.tam+': unas '+d.usos+' aplicaciones por pote, '+d.cpu+' cada una.', title:d.usos+' lavados en un pote', button:'Más información'})
+    ], hip:'El rendimiento convence más que el precio total.'},
+    {id:'A3', enfoque:'precio', nombre:'Combo x2', kind:'none', v:[
+      d => ({tag:'Precio · combo', h:'Llevá 2, pagá menos', s:'2 potes por '+d.combo+'.', cta:'Quiero el combo',
+             primary:'Para no quedarte sin: 2 potes de '+d.marca+' '+d.producto+' por '+d.combo+'.', title:'Llevá 2 por '+d.combo, button:'Comprar'}),
+      d => ({tag:'Precio · combo', h:'Uno para vos, otro para tu hermana', s:'2 potes por '+d.combo+'.', cta:'Quiero el combo',
+             primary:'Compartí los rulos: 2 potes de '+d.marca+' '+d.producto+' por '+d.combo+'.', title:'2 potes por '+d.combo, button:'Comprar'})
+    ], hip:'Un combo sube el ticket promedio.'},
+    {id:'B1', enfoque:'calidad', nombre:'Resultado', kind:'none', v:[
+      d => ({tag:'Calidad · resultado', h:'Mismo pelo. Otra definición.', s:d.marca+' '+d.producto+'.', cta:'Comprar',
+             primary:'Mismo pelo, otra definición. '+d.marca+' '+d.producto+' '+d.tam+'.', title:'Mismo pelo. Otra definición.', button:'Comprar'}),
+      d => ({tag:'Calidad · resultado', h:'Rulos definidos desde la primera lavada', s:d.marca+' '+d.producto+'.', cta:'Comprar',
+             primary:'Rulos definidos desde la primera lavada. '+d.marca+' '+d.producto+' '+d.tam+'.', title:'Rulos definidos desde el día 1', button:'Comprar'})
+    ], hip:'Mostrar el resultado vende más que explicar el producto.'},
+    {id:'B2', enfoque:'calidad', nombre:'Beneficios', kind:'checks', v:[
+      d => ({tag:'Calidad · beneficios', h:'Lo que tus rulos te venían pidiendo', s:'', cta:'Probala',
+             primary:d.beneficios.join(', ')+'. '+d.marca+' '+d.producto+'.', title:'Probala en tus rulos', button:'Comprar'}),
+      d => ({tag:'Calidad · beneficios', h:'Tu rutina de rulos en un paso', s:'', cta:'Probala',
+             primary:'Un solo producto: '+d.beneficios.join(', ').toLowerCase()+'.', title:'Tu rutina en un paso', button:'Comprar'})
+    ], hip:'Explicar el producto ayuda a quien no lo conoce.'},
+    {id:'B3', enfoque:'calidad', nombre:'Estilo de vida', kind:'none', v:[
+      d => ({tag:'Calidad · estilo', h:'Rulos con onda todo el día', s:'De la mañana a la noche, sin frizz.', cta:'Lo quiero',
+             primary:'Rulos con onda de la mañana a la noche. '+d.marca+' '+d.producto+'.', title:'Rulos con onda todo el día', button:'Comprar'}),
+      d => ({tag:'Calidad · estilo', h:'Tus rulos, tu mejor accesorio', s:d.marca+' '+d.producto+' '+d.tam+'.', cta:'Lo quiero',
+             primary:'Tus rulos son tu mejor accesorio. Cuidalos con '+d.marca+'.', title:'Tus rulos, tu mejor accesorio', button:'Comprar'})
+    ], hip:'Asociar el producto a un estilo de vida genera deseo.'},
+    {id:'B4', enfoque:'calidad', nombre:'Producto original', kind:'none', v:[
+      d => ({tag:'Calidad · confianza', h:'Original de Brasil. Sin vueltas.', s:d.marca+' original. Te asesoramos por WhatsApp.', cta:'Escribinos',
+             primary:d.marca+' original. ¿Dudas sobre cuál es para tu tipo de rulo? Escribinos y te asesoramos.', title:'Original de Brasil. Sin vueltas.', button:'Enviar mensaje de WhatsApp'}),
+      d => ({tag:'Calidad · asesoramiento', h:'¿No sabés cuál es para tu rulo?', s:'Escribinos y te recomendamos. '+d.marca+' original.', cta:'Escribinos',
+             primary:'Cada rulo es distinto. Contanos el tuyo por WhatsApp y te decimos qué '+d.marca+' te conviene.', title:'Te asesoramos gratis', button:'Enviar mensaje de WhatsApp'})
+    ], hip:'La confianza y el asesoramiento generan consultas.'},
+    {id:'C1', enfoque:'urgencia', nombre:'Fecha límite', kind:'deadline', v:[
+      d => ({tag:'Urgencia · tiempo', h:'Últimas horas al -'+d.pct+'%', s:'Termina '+d.fin+'. Después vuelve a '+d.L+'.', cta:'Aprovechar ahora',
+             primary:'Últimas horas con '+d.pct+'% OFF en '+d.marca+' '+d.producto+'. Termina '+d.fin+'.', title:'Últimas horas al -'+d.pct+'%', button:'Comprar'}),
+      d => ({tag:'Urgencia · tiempo', h:'Se termina '+d.fin, s:d.pct+'% OFF hasta entonces: '+d.O+'.', cta:'Aprovechar ahora',
+             primary:'La promo de '+d.marca+' a '+d.O+' se termina '+d.fin+'. No lo dejes para después.', title:'Se termina '+d.fin, button:'Comprar'})
+    ], hip:'Un límite de tiempo acelera la compra.'},
+    {id:'C2', enfoque:'urgencia', nombre:'Stock limitado', kind:'stock', v:[
+      d => ({tag:'Urgencia · stock', h:'Quedan pocos potes de esta tanda', s:'', cta:'Reservar el mío',
+             primary:'Quedan pocos potes de '+d.marca+' '+d.producto+'. Reservá el tuyo antes de que se agote.', title:'Quedan pocos potes', button:'Pedir ahora'}),
+      d => ({tag:'Urgencia · stock', h:'Se nos está por agotar', s:'', cta:'Reservar el mío',
+             primary:'La '+d.producto+' de '+d.marca+' se está por agotar. Asegurá la tuya.', title:'Se está por agotar', button:'Pedir ahora'})
+    ], hip:'La escasez funciona mejor que el reloj.'},
+    {id:'C3', enfoque:'urgencia', nombre:'Cupo limitado', kind:'none', v:[
+      d => ({tag:'Urgencia · cupo', h:'Solo para los primeros '+d.cupo+' pedidos', s:d.producto+' '+d.tam+' a '+d.O+'. Después vuelve a precio normal.', cta:'Entrar en el cupo',
+             primary:'Solo los primeros '+d.cupo+' pedidos se llevan '+d.marca+' '+d.producto+' a '+d.O+'.', title:'Solo los primeros '+d.cupo, button:'Comprar'}),
+      d => ({tag:'Urgencia · cupo', h:d.cupo+' potes a '+d.O+'. Ni uno más.', s:'Cuando se llena el cupo, vuelve a '+d.L+'.', cta:'Entrar en el cupo',
+             primary:d.cupo+' potes de '+d.marca+' a '+d.O+'. Cuando se llena el cupo, vuelve a '+d.L+'.', title:d.cupo+' potes a '+d.O, button:'Comprar'})
+    ], hip:'Un cupo concreto genera más urgencia.'}
+  ];
+  // ---------- IA: Pollinations.ai (gratis) ----------
+  let serverMode = false;
+  const key = () => serverMode ? 'server' : ($('#pkey').value || '').trim();
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const pick = (arr, n) => arr[Math.abs(n) % arr.length];
+  const EXTRA_MAP = {precio:'price', checks:'checks', reloj:'deadline', stock:'stock', ninguno:'none'};
+  const BOTONES = ['Comprar','Más información','Pedir ahora','Enviar mensaje de WhatsApp'];
+  const LAYOUTS = ['pop','banda','editorial','centrado','impacto','tarjeta','pop'];
+  const layFor = (i, tanda) => LAYOUTS[(i + (tanda || 0) * 2) % LAYOUTS.length];
+  function enfoques(){ const v = $$('#enfoques input:checked').map(i => i.value); return v.length ? v : ['precio','calidad','urgencia']; }
+  function reparto(n){
+    const e = enfoques(); if (e.length === 3) return n === 10 ? {precio:3, calidad:4, urgencia:3} : {precio:2, calidad:2, urgencia:1};
+    const r = {}; e.forEach((k, i) => r[k] = Math.floor(n / e.length) + (i < n % e.length ? 1 : 0)); return r;
+  }
+  function brief(){
+    const fd = new FormData(form), g = k => String(fd.get(k) || '').trim();
+    return ['Tienda: ' + (g('tienda') || '[sin cuenta]'), 'Marca: ' + g('marca'), 'Producto: ' + g('producto') + ' ' + g('tam'),
+      'Precio de lista: $' + (g('lista') || '[sin dato]') + ' · Precio oferta: $' + (g('oferta') || '[sin dato]') + ' · Combo x2: $' + (g('combo') || '[sin dato]'),
+      'Rinde: ' + (g('usos') || '[sin dato]') + ' usos por envase', 'Público: ' + g('publico'), 'Beneficios: ' + g('beneficios'),
+      'Tono pedido: ' + (isX(opt.tono) ? xTxt(opt.tono) : opt.tono),
+      'Promo vigente: ' + (g('fin') ? 'termina ' + g('fin') + (g('cupo') ? ', cupo de ' + g('cupo') + ' pedidos' : '') : 'NINGUNA')].join('\n');
+  }
+  const SCHEMA = `{"enfoque":"precio|calidad|urgencia","angulo":"nombre corto","extra":"precio|checks|reloj|stock|ninguno","etiqueta":"máx 3 palabras","titular":"máx 7 palabras, con gancho","bajada":"máx 12 palabras o vacío","cta_imagen":"máx 3 palabras","texto_principal":"máx 125 caracteres","titulo_meta":"máx 40 caracteres","boton_meta":"Comprar|Más información|Pedir ahora|Enviar mensaje de WhatsApp","hipotesis":"1 frase","estilo":"editorial|impacto|tarjeta","idea_foto":"en inglés, 1 frase: pose, gesto, emoción y accesorios de la escena"}`;
+  const RULES = `Sos redactor publicitario de una tienda online uruguaya. Escribís en español rioplatense con voseo ("comprá", "vos", "tenés"), natural, con gancho y sin clichés.
+Reglas:
+- No inventes precios, descuentos, testimonios, reseñas, cifras ni datos que no estén en el brief. Si falta un dato, ponelo entre corchetes.
+- Las piezas de urgencia usan solo la promo vigente del brief. Si es NINGUNA, urgencia suave sin fechas ni cupos inventados.
+- "extra": precio (precio tachado y oferta), checks (beneficios), reloj (fecha de fin, solo si hay promo), stock (barra de stock) o ninguno.
+- "estilo": editorial (texto abajo sobre la foto), impacto (titular grande arriba) o tarjeta (texto en una tarjeta clara). Alterná.
+- Titulares: usá una FÓRMULA DISTINTA en cada anuncio y no repitas estructura ni palabras iniciales: pregunta directa; número o dato concreto; imperativo con voseo; beneficio en 3 palabras; contraste antes/ahora; curiosidad o intriga; expresión rioplatense ("¡Qué rulos!", "Posta que rinde"); frase muy corta de 2 o 3 palabras; promesa de resultado; complicidad ("Las de rulos sabemos…"). Variá también el largo de la bajada (a veces vacía), la etiqueta y el CTA.
+- "idea_foto": variá pose y emoción en cada anuncio (sonriendo, tocando sus rulos, mirando a cámara, riendo, de perfil, aplicando crema). Escribila sin decir si es hombre o mujer (usá "the person"). No describas la ropa ni el fondo, eso lo define la app.`;
+  function parseJSON(text){
+    const tries = [text, (text.match(/```(?:json)?\s*([\s\S]*?)```/) || [])[1]];
+    const a = text.indexOf('['), b = text.lastIndexOf(']'), c = text.indexOf('{'), d2 = text.lastIndexOf('}');
+    if (a >= 0 && b > a) tries.push(text.slice(a, b + 1));
+    if (c >= 0 && d2 > c) tries.push(text.slice(c, d2 + 1));
+    for (const t of tries){ if (!t) continue; try { return JSON.parse(t); } catch {} }
+    throw {code:'invalid_json'};
+  }
+  async function aiText(prompt, outer, ms){
+    const ctl = new AbortController(), signal = ctl.signal; let timedOut = false;
+    const to = setTimeout(() => { timedOut = true; ctl.abort(); }, ms || 70000);
+    if (outer) outer.addEventListener('abort', () => ctl.abort());
+    try { return await aiTextInner(prompt, signal); }
+    catch (e) { if (timedOut) throw {code:'timeout'}; throw e; }
+    finally { clearTimeout(to); }
+  }
+  async function aiTextInner(prompt, signal){
+    const k = key(), body = JSON.stringify({model:'openai', messages:[{role:'user', content:prompt}], seed: Math.floor(Math.random() * 1e9)});
+    const url = serverMode ? '/api/chat' : k ? 'https://gen.pollinations.ai/v1/chat/completions' : 'https://text.pollinations.ai/openai';
+    const hdr = {'Content-Type':'application/json'}; if (k && !serverMode) hdr.Authorization = 'Bearer ' + k;
+    let res = null;
+    try { res = await fetch(url, {method:'POST', headers: hdr, body, signal}); }
+    catch (e) { if (signal && signal.aborted) throw {code:'cancelled'}; }
+    if (res && (res.status === 402 || res.status === 429)) throw {code:'limite', wait: Number(res.headers.get('Retry-After')) || 20};
+    if (!res || !res.ok){
+      if (k) throw {code:'red'};
+      try { res = await fetch('https://text.pollinations.ai/' + encodeURIComponent(prompt) + '?model=openai&seed=' + Math.floor(Math.random() * 1e9), {signal}); }
+      catch (e) { if (signal && signal.aborted) throw {code:'cancelled'}; throw {code:'red'}; }
+      if (res.status === 402 || res.status === 429) throw {code:'limite', wait: Number(res.headers.get('Retry-After')) || 20};
+      if (!res.ok) throw {code:'red'};
+    }
+    const raw = await res.text(); let txt = raw;
+    try { const j = JSON.parse(raw); if (j && j.choices && j.choices[0]) txt = j.choices[0].message.content || ''; } catch {}
+    return parseJSON(txt);
+  }
+  const errMsg = e => e && e.code === 'timeout' ? 'La IA está tardando demasiado.'
+    : e && e.code === 'limite' ? `La IA recibió muchos pedidos seguidos. Esperá unos ${e.wait || 20} segundos y probá de nuevo.`
+    : e && e.code === 'invalid_json' ? 'La IA respondió en un formato raro. Probá de nuevo.'
+    : 'No se pudo conectar con la IA. Revisá tu conexión y probá de nuevo.';
+
+  // ---------- Prompt de la foto: se arma con las opciones de la empresa ----------
+  function fotoPrompt(a){
+    const s = a.seed, o = a.op || opt;
+    const edades = {'18-25':['21-year-old','24-year-old'], '26-35':['28-year-old','33-year-old'], '36-45':['38-year-old','43-year-old']};
+    const edad = isX(o.edad) ? `(age ${xTxt(o.edad)})` : o.edad === 'variada' ? pick(['22-year-old','27-year-old','31-year-old','36-year-old','42-year-old'], s) : pick(edades[o.edad] || ['28-year-old'], s);
+    const rulos = {ondas:['soft defined 2C waves','loose beachy waves'], rulos:['bouncy defined 3A curls','voluminous 3B ringlet curls','big glossy 3C curls'], afro:['defined 4A coily hair','voluminous 4B afro curls']};
+    const rulo = isX(o.rulo) ? xTxt(o.rulo) : o.rulo === 'variado' ? pick([].concat(rulos.ondas, rulos.rulos, rulos.afro), s >> 3) : pick(rulos[o.rulo] || rulos.rulos, s >> 3);
+    const pieles = {clara:['fair skin with freckles','light skin'], 'trigueña':['olive skin','warm tan skin'], morena:['golden brown skin','caramel skin'], negra:['deep brown skin','dark ebony skin']};
+    const piel = isX(o.piel) ? xTxt(o.piel) : o.piel === 'variado' ? pick([].concat(...Object.values(pieles)), s >> 5) : pick(pieles[o.piel] || pieles['trigueña'], s >> 5);
+    const fondoKey = o.fondo === 'variado' ? pick(Object.keys(FONDOS), s >> 7) : o.fondo;
+    const fi = fondoInfo(fondoKey), col = fi[1];
+    a.bg = fi[0];
+    const escenas = {
+      color: `seamless ${col} studio backdrop`,
+      flores: `${col} backdrop with tropical flowers, leaves and fresh fruit props (peach, citrus, hibiscus)`,
+      bano: `bright airy bathroom with ${col} tones and soft daylight from a window`,
+      ciudad: `sunny street in Montevideo with colonial facades, ${col} color accents`,
+      playa: `Uruguayan beach at golden hour, soft ${col} tones`,
+      amigas: `cozy cafe terrace with friends, ${col} color accents`
+    };
+    const tipo = (!o.tipofoto || o.tipofoto === 'variado') ? 'modelo' : o.tipofoto;
+    if (isX(o.escena)) escenas[o.escena] = `${xTxt(o.escena)}, ${col} color accents`;
+    if (tipo !== 'modelo') return promptTipo(a, tipo, {col, rulo, escena: escenas[o.escena] || escenas.color, foto: o.foto});
+    const gen = genderOf(a), man = gen === 'hombre', pos = man ? 'his' : 'her';
+    const ropa = man ? pick(['a colorful casual cotton t-shirt','a light linen shirt','a cozy knit sweater','a denim jacket over a white tee','a short-sleeve summer shirt'], s >> 9) : pick(['a colorful casual cotton t-shirt','a light linen button-up blouse','a cozy pastel knit sweater','a denim jacket over a white tee','a flowy summer blouse with sleeves'], s >> 9);
+    const persona = isX(o.personas) ? `${xTxt(o.personas)}, fictional smiling people in casual everyday clothes with defined curly hair, the main one ${edad} with ${rulo} and ${piel}`
+      : o.personas === 'dos' ? `${gen === 'mixto' ? 'a fictional smiling woman and man, friends,' : man ? 'two fictional smiling men friends' : 'two fictional smiling women friends'} in casual everyday clothes, one ${edad} with ${rulo} and ${piel}, both with defined curly hair`
+      : `a fictional ${edad} ${man ? 'man' : 'woman'} with ${rulo} and ${piel}, wearing ${ropa}`;
+    const pote = (o.pote === 'si' && !prodOf(a)) ? ', happily showing a small plain white jar of hair cream to the camera at chest height' : '';
+    const estilo = isX(o.foto) ? `${xTxt(o.foto)} hair care advertising photo` : {editorial:'bright cheerful hair care advertising photo for a family-friendly cosmetics brand', natural:'bright authentic lifestyle photo for a hair care brand', minimal:'clean bright minimalist studio photo for a hair care brand'}[o.foto] || 'bright cheerful hair care advertising photo';
+    const libre = (prodOf(a) && !integra(a)) ? `, empty hands touching ${pos} hair, nothing in ${pos} hands, no bottles or jars in the scene, clear space in the lower right corner` : '';
+    const comp = libre + ((a.layout === 'impacto' || a.layout === 'pop') ? 'subject placed in the lower two thirds, calm empty background space at the top for a headline' : 'subject in the upper two thirds, calm empty space in the lower third for text');
+    return `${estilo} of ${persona}${pote}, ${ideaSegura(a.idea, a.seed)}, ${escenas[o.escena] || escenas.color}, ${comp}, warm genuine smile, friendly and confident, modest and fully clothed, focus on ${pos} healthy defined curly hair, real photograph of a real-looking person, natural skin texture with pores, natural makeup, shot on a full-frame DSLR with an 85mm lens, shallow depth of field, candid commercial photography, not an illustration, not anime, not a 3D render, not CGI, bright high-key lighting, airy pastel colors, sharp focus, no text, no letters, no logos, no watermark`;
+  }
+  const TIPOS_CON_PRODUCTO = ['modelo','producto','flatlay','manos'];
+  function promptTipo(a, tipo, c){
+    const real = 'real photograph, photorealistic, natural textures, shot on a full-frame DSLR, soft natural light, bright high-key lighting, airy pastel colors, sharp focus, not an illustration, not a 3D render, no text, no letters, no logos, no watermark';
+    const conProd = integra(a) && TIPOS_CON_PRODUCTO.includes(tipo), hayProd = !!prodOf(a);
+    const prod = conProd ? 'the exact product from the reference image (same bottle shape, colors and label, do not redraw the label)' : 'a plain unbranded cosmetic jar of hair cream';
+    const espacio = (a.layout === 'impacto' || a.layout === 'pop') ? 'leave calm empty space at the top for a headline' : 'leave calm empty space in the lower third for text';
+    const sinProd = hayProd && !conProd ? ', with clear empty space in the lower right corner for a product to be added later, no bottles or jars in the scene' : '';
+    const props = pick(['fresh peach slices and hibiscus flowers','citrus slices and green leaves','pastel flowers and a silk ribbon','tropical monstera leaves and orchids','smooth pebbles and dried pampas grass'], a.seed);
+    switch (tipo){
+      case 'producto': return `bright hair care product still life advertising photograph of ${hayProd && !conProd ? 'an elegant styled surface' : prod} on a pedestal, surrounded by ${props}, seamless ${c.col} backdrop, gentle shadows${sinProd}, ${espacio}, ${real}`;
+      case 'flatlay': return `top-down flat lay photograph on a ${c.col} surface with ${hayProd && !conProd ? 'a composition of' : prod + ' in the center and'} ${props}, a wide-tooth comb and a silk scrunchie, neatly arranged${sinProd}, ${espacio}, ${real}`;
+      case 'manos': return `close-up photograph of hands applying ${conProd ? 'hair cream taken from ' + prod : 'a creamy hair styling cream'} to beautiful defined ${c.rulo}, no face visible, ${c.escena}${sinProd}, ${espacio}, ${real}`;
+      case 'textura': return `macro close-up photograph of a glossy swirl of white creamy hair styling cream texture on fingertips, silky and rich, ${c.col} background${sinProd}, ${espacio}, ${real}`;
+      case 'rulos': return `close-up photograph of beautiful glossy defined ${c.rulo} seen from behind and slightly from the side, no face visible, light catching the curls, ${c.col} background${sinProd}, ${espacio}, ${real}`;
+      case 'antesdespues': return `split-screen before and after comparison photograph of the same curly hair seen from behind, no face visible: left half dry frizzy undefined puffy curls, right half the same hair with defined glossy hydrated ${c.rulo}, same person, same lighting, same ${c.col} background, a clean vertical dividing line exactly in the middle, ${real}`;
+    }
+    return '';
+  }
+  const IDEAS_OK = ['smiling at the camera','touching the curls with both hands','laughing joyfully','looking over the shoulder with a smile','playing with a curl and smiling','eyes closed, enjoying the moment, smiling','confident pose with a big smile','showing her curls proudly'];
+  function ideaSegura(t, s){ return /(sexy|sensual|seduct|lingerie|bra|bikini|nude|naked|bed|undress|strap|lip bit|biting|desnud|provoc)/i.test(t || '') || !t ? pick(IDEAS_OK, s) : t; }
+  function integra(a){ const o = a.op || opt, t = (!o.tipofoto || o.tipofoto === 'variado') ? 'modelo' : o.tipofoto; return (o.prodModo || 'mano') !== 'pegar' && !!prodOf(a) && !!key() && TIPOS_CON_PRODUCTO.includes(t); }
+  function fotoPromptInt(a){
+    const tt = (a.op || opt).tipofoto; if (tt && tt !== 'variado' && tt !== 'modelo') return 'Create a brand-new realistic advertising photograph that features the product shown in the reference image. Keep the product exactly identical: same bottle shape, colors, cap and label design, do not change or redraw the label. ' + fotoPrompt(a);
+    const base = fotoPrompt(Object.assign({}, a, {op: Object.assign({}, a.op || opt, {pote: 'no'})}));
+    const modo = (a.op || opt).prodModo === 'apoyado'
+      ? `this exact product from the reference image stands upright on a small table or shelf right next to ${genderOf(a) === 'hombre' ? 'him' : 'her'}, label facing the camera, clearly visible and in focus`
+      : `${genderOf(a) === 'hombre' ? 'he holds' : 'she holds'} this exact product from the reference image in one hand at chest height, label facing the camera, fingers naturally wrapped around it, clearly visible and in focus`;
+    return `Create a brand-new realistic advertising photograph that features the product shown in the reference image. Keep the product exactly identical: same bottle shape, colors, cap and label design, do not change or redraw the label. ${modo}. Scene: ${base.replace(/^[^,]*of /, '')}`;
+  }
+  function imageURL(a){
+    const f = FORMATOS[formato], k = key(); a._intReq = false;
+    const enc = encodeURIComponent(fotoPrompt(a)), model = 'flux';
+    const q = `width=${f.iw}&height=${f.ih}&seed=${a.seed}&model=${model}&nologo=true&enhance=false&safe=true`;
+    if (serverMode) return `/api/image/${enc}?${q}`;
+    return k ? `https://gen.pollinations.ai/image/${enc}?${q}` : `https://image.pollinations.ai/prompt/${enc}?${q}`;
+  }
+  function shrink(blob, max){
+    return new Promise((res, rej) => { const u = URL.createObjectURL(blob), im = new Image(); im.onload = () => {
+      const k = Math.min(1, (max || 1080) / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg', 0.86)); }; im.onerror = rej; im.src = u; });
+  }
+  const queue = []; let qRunning = false;
+  function queueImage(a){ a.imgState = 'cola'; delete a.img; a.imgEl = null; if (!queue.includes(a)) queue.push(a); refresh(a); runQueue(); }
+  async function loadImage(url){
+    try {
+      const k = key(), hdrs = k && url.includes('gen.pollinations.ai') ? {Authorization: 'Bearer ' + k} : {};
+      const res = await fetch(url, {headers: hdrs});
+      if (res.status === 402 || res.status === 429){ const t = await res.text().catch(() => ''); if (/balance|pollen|insufficient|credit|tier|paid/i.test(t)) return {fatal: true, code: res.status, saldo: true}; return {retry: Number(res.headers.get('Retry-After')) || 15, code: res.status}; }
+      if (res.status === 401 || res.status === 403){ const t = await res.text().catch(() => ''); return {fatal: true, code: res.status, saldo: /balance|pollen|insufficient|credit|tier|paid/i.test(t)}; }
+      if (!res.ok) return {err: 'HTTP ' + res.status, code: res.status};
+      const blob = await res.blob();
+      if (!/^image\//.test(blob.type)){ const t = await blob.text().catch(() => ''); return {err: 'la respuesta no es una imagen' + (t ? ': ' + t.slice(0, 120) : '')}; }
+      return {data: await shrink(blob, 1080)};
+    } catch (e) {
+      // Respaldo: cargar como imagen común (sirve aunque el servidor no permita fetch)
+      return await new Promise(res => {
+        const im = new Image(); let done = false; im.crossOrigin = 'anonymous';
+        const fin = r => { if (!done){ done = true; clearTimeout(to); res(r); } };
+        const to = setTimeout(() => fin({err: 'tiempo agotado'}), 120000);
+        im.onload = () => { try { const c = document.createElement('canvas'), k = Math.min(1, 1080 / Math.max(im.width, im.height)); c.width = im.width * k; c.height = im.height * k; c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); fin({data: c.toDataURL('image/jpeg', .86)}); } catch { fin({remote: url}); } };
+        im.onerror = () => {
+          const im2 = new Image(); im2.onload = () => fin({remote: url}); im2.onerror = () => fin({err: 'no se pudo cargar la imagen (conexión bloqueada o límite)'}); im2.src = url + '&r=' + Date.now();
+        };
+        im.src = url.includes('gen.pollinations.ai') && key() ? url + '&key=' + encodeURIComponent(key()) : url;
+      });
+    }
+  }
+  async function editImage(a){
+    const P = prodOf(a), k = key(), f = FORMATOS[formato]; a._intReq = true;
+    const blob = await new Promise(res => { const c = document.createElement('canvas'), m = Math.min(1, 1024 / Math.max(P.width, P.height)); c.width = Math.round(P.width * m); c.height = Math.round(P.height * m); const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(P, 0, 0, c.width, c.height); c.toBlob(res, 'image/png'); });
+    const send = async withSize => {
+      const fd = new FormData(); fd.append('model', opt.modeloInt || 'kontext'); fd.append('prompt', fotoPromptInt(a)); fd.append('image', blob, 'producto.png'); fd.append('n', '1'); fd.append('seed', String(a.seed));
+      if (withSize) fd.append('size', `${f.iw}x${f.ih}`);
+      return serverMode ? fetch('/api/edits', {method: 'POST', body: fd}) : fetch('https://gen.pollinations.ai/v1/images/edits', {method: 'POST', headers: {Authorization: 'Bearer ' + k}, body: fd});
+    };
+    let res; try { res = await send(true); if (res.status === 400) res = await send(false); } catch (e) { return {err: 'no se pudo conectar con la IA que integra el producto'}; }
+    const txt = () => res.text().catch(() => '');
+    if (res.status === 402 || res.status === 429){ const t = await txt(); if (/balance|pollen|insufficient|credit|tier|paid/i.test(t)) return {fatal: true, code: res.status, saldo: true}; return {retry: Number(res.headers.get('Retry-After')) || 15, code: res.status}; }
+    if (res.status === 401 || res.status === 403){ const t = await txt(); return {fatal: true, code: res.status, saldo: /balance|pollen|insufficient|credit|tier|paid/i.test(t)}; }
+    if (!res.ok){ const t = await txt(); return {err: 'HTTP ' + res.status + (t ? ': ' + t.slice(0, 140) : '')}; }
+    const ct = res.headers.get('content-type') || '';
+    if (ct.startsWith('image/')) return {data: await shrink(await res.blob(), 1080)};
+    const j = await res.json().catch(() => null), it = j && j.data && j.data[0];
+    if (it && it.b64_json){ const bin = atob(it.b64_json), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); return {data: await shrink(new Blob([u8], {type: 'image/png'}), 1080)}; }
+    if (it && it.url) return await loadImage(it.url);
+    return {err: 'la IA respondió sin imagen'};
+  }
+  let lastImgErr = '';
+  async function runQueue(){
+    if (qRunning) return; qRunning = true;
+    while (queue.length){
+      const a = queue.shift(); if (!ads.includes(a)) continue;
+      a.imgState = 'cargando'; delete a.imgErr; refresh(a); fotoStatus();
+      let ok = false, fatal = false;
+      for (let i = 0; i < 8 && !ok && !fatal; i++){
+        const r = integra(a) ? await editImage(a) : await loadImage(imageURL(a));
+        if (r.data){ a.img = r.data; a.tainted = false; ok = true; a.integrado = !!a._intReq; }
+        else if (r.remote){ a.img = r.remote; a.tainted = true; ok = true; a.integrado = !!a._intReq; }
+        else if (r.retry){ fotoStatus(`Muchos pedidos seguidos: esperando ${r.retry} segundos…`); await sleep(r.retry * 1000); }
+        else if (r.fatal){ fatal = true; a.imgErr = r.saldo ? (a._intReq ? 'La IA no pudo integrar el producto. Probá otra opción en ⚙ Ajustes o elegí "Pegarlo encima".' : 'La IA se quedó sin crédito disponible. Avisale a quien administra el sitio.') : 'La IA rechazó el pedido (código ' + r.code + '). Probá de nuevo en un rato.'; }
+        else { a.imgErr = r.err; await sleep(3000 + i * 2000); }
+      }
+      a.imgEl = null; a.imgState = ok ? 'ok' : 'error'; if (!ok){ lastImgErr = a.imgErr || 'sin respuesta'; }
+      refresh(a); persist(); fotoStatus();
+      if (fatal){ queue.forEach(x => { x.imgState = 'error'; x.imgErr = a.imgErr; refresh(x); }); queue.length = 0; break; }
+      await sleep(key() ? 500 : 2500);
+    }
+    qRunning = false; fotoStatus();
+  }
+  function fotoStatus(extra){
+    if (extra){ status(extra, 'busy'); return; }
+    const n = ads.filter(a => a.imgState === 'cola' || a.imgState === 'cargando').length;
+    if (n) status(`La IA está creando las fotos: faltan ${n}. Mientras tanto podés editar los textos.`, 'busy');
+    else if (!busy && /creando las fotos|Muchos pedidos seguidos/.test($('#status').textContent)) {
+      const fails = ads.filter(a => a.imgState === 'error').length;
+      if (fails){ status(`No se pudieron crear ${fails} fotos. Motivo: ${lastImgErr}. Probá de nuevo en un rato.`, 'err'); $('#secAdv').open = true; }
+      else { status('¡Listo! Todas las fotos están generadas.'); setTimeout(() => status(''), 3500); }
+    }
+  }
+
+  // ---------- Crear anuncios ----------
+  const uid = () => Math.random().toString(36).slice(2, 9);
+  const CICLO_TIPOS = ['modelo','producto','antesdespues','modelo','rulos','flatlay','modelo','textura','manos','modelo'];
+  const CICLO_ESC = ['color','flores','bano','ciudad','playa','amigas'];
+  function opVariado(i, tanda){
+    const o = Object.assign({}, opt), k = i + tanda * 3;
+    if (o.tipofoto === 'variado') o.tipofoto = CICLO_TIPOS[k % CICLO_TIPOS.length];
+    if (o.escena === 'variado') o.escena = CICLO_ESC[(i * 2 + tanda) % CICLO_ESC.length];
+    if (o.fondo === 'variado') o.fondo = Object.keys(FONDOS)[(i * 3 + tanda) % Object.keys(FONDOS).length];
+    if (o.tipofoto === 'modelo' && opt.personas === 'una' && k % 4 === 3) o.personas = 'dos';
+    return o;
+  }
+  function baseAd(tanda, i){
+    return {uid: uid(), tanda, seed: Math.floor(Math.random() * 1e9), op: opVariado(i, tanda), acc: opt.acento, font: fontFor(i, tanda), showPrice: true, showLogo: true, showProd: true, prodPos: 'der', prodSize: 'M', fav: false};
+  }
+  function normalize(o, tanda, i){
+    o = o || {}; const t = v => String(v == null ? '' : v).trim();
+    const enf = ['precio','calidad','urgencia'].includes(t(o.enfoque).toLowerCase()) ? t(o.enfoque).toLowerCase() : 'calidad';
+    let kind = EXTRA_MAP[t(o.extra).toLowerCase()] || 'none';
+    if (kind === 'deadline' && !String(new FormData(form).get('fin') || '').trim()) kind = 'none';
+    const lay = opt.layout !== 'auto' ? opt.layout : layFor(i, tanda);
+    return Object.assign(baseAd(tanda, i), {source:'ia', enfoque: enf, nombre: t(o.angulo) || 'Variante', kind, layout: lay,
+      tag: t(o.etiqueta) || enf, h: t(o.titular) || '[titular]', s: t(o.bajada), cta: t(o.cta_imagen) || 'Comprar',
+      primary: t(o.texto_principal), title: t(o.titulo_meta), button: BOTONES.includes(t(o.boton_meta)) ? t(o.boton_meta) : 'Comprar',
+      hip: t(o.hipotesis), idea: t(o.idea_foto), popVar: (i + tanda) % 4});
+  }
+  function numerar(list){ const c = {precio:0, calidad:0, urgencia:0}; list.forEach(a => { c[a.enfoque]++; a.id = a.enfoque[0].toUpperCase() + c[a.enfoque]; a.orig = snap(a); }); }
+  const snap = a => JSON.stringify({nombre:a.nombre, kind:a.kind, layout:a.layout, tag:a.tag, h:a.h, s:a.s, cta:a.cta, primary:a.primary, title:a.title, button:a.button, hip:a.hip, idea:a.idea, acc:a.acc, font:a.font});
+
+  let plan = [], planOn = false;
+  const AUTO = [['auto','General']];
+  function planFields(){
+    const noVar = k => OPTS[k].items.filter(([v]) => !v.startsWith('variad'));
+    return [
+      ['enfoque','Enfoque', AUTO.concat([['precio','Precio'],['calidad','Calidad'],['urgencia','Urgencia']])],
+      ['tipofoto','Tipo de foto', AUTO.concat(noVar('tipofoto'))],
+      ['escena','Escena', AUTO.concat(noVar('escena'))],
+      ['fondo','Color de fondo', AUTO.concat(noVar('fondo'))],
+      ['genero','Quiénes', AUTO.concat(noVar('genero'))],
+      ['personas','Personas', AUTO.concat(OPTS.personas.items)],
+      ['edad','Edad', AUTO.concat(noVar('edad'))],
+      ['rulo','Rulo', AUTO.concat(noVar('rulo'))],
+      ['piel','Piel', AUTO.concat(noVar('piel'))],
+      ['prodId','Producto', AUTO.concat(prods.map(pp => [pp.id, pp.name]), [['none','Sin producto']])],
+      ['prodModo','Cómo aparece', AUTO.concat(OPTS.prodModo.items)],
+      ['font','Tipografía', AUTO.concat(FONT_KEYS.map(k => [k, FONTS[k].n]))],
+      ['layout','Estilo del texto', AUTO.concat([['pop','Marcador'],['banda','Banda de color'],['editorial','Editorial'],['centrado','Centrado'],['impacto','Impacto'],['tarjeta','Tarjeta']])],
+      ['kind','Destacado', AUTO.concat([['price','Sello de precio'],['checks','Íconos'],['deadline','Fecha límite'],['stock','Stock'],['none','Ninguno']])]
+    ];
+  }
+  function ensurePlan(){ const n = Number(opt.cantidad) || 10; while (plan.length < n) plan.push({}); plan.length = n; }
+  function renderPlan(){
+    ensurePlan(); const F = planFields(), t = $('#planTable');
+    t.innerHTML = `<thead><tr><th>#</th>${F.map(f => `<th>${f[1]}</th>`).join('')}</tr></thead><tbody>${plan.map((sl, i) => `<tr><td><b>${i + 1}</b></td>${F.map(([k, , items]) => `<td><select data-row="${i}" data-k="${k}" class="${sl[k] && sl[k] !== 'auto' ? 'set' : ''}" aria-label="Anuncio ${i + 1}: ${k}">${items.map(([v, n]) => `<option value="${v}" ${(sl[k] || 'auto') === v ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></td>`).join('')}</tr>`).join('')}</tbody>`;
+    t.querySelectorAll('select').forEach(sel => sel.onchange = () => { const r = +sel.dataset.row; plan[r][sel.dataset.k] = sel.value; sel.classList.toggle('set', sel.value !== 'auto'); if (!planOn){ planOn = true; $('#planOn').checked = true; } savePlan(); });
+    $('#planOn').checked = planOn;
+  }
+  function savePlan(){ try { localStorage.setItem('ads-plan', JSON.stringify({plan, planOn})); } catch {} planInfo(); }
+  function planInfo(){ const el = $('#planInfo'); if (!el) return; const set = plan.filter(sl => Object.values(sl).some(v => v && v !== 'auto')).length; el.textContent = planOn && set ? `Plan activo: ${set} de ${plan.length} anuncios con opciones propias` : ''; }
+  function planEnfoques(n){
+    const rep = reparto(n), pool = [];
+    ['precio','calidad','urgencia'].forEach(k => { for (let i = 0; i < (rep[k] || 0); i++) pool.push(k); });
+    const fixed = Array.from({length: n}, (_, i) => planOn && plan[i] && plan[i].enfoque && plan[i].enfoque !== 'auto' ? plan[i].enfoque : null);
+    fixed.forEach(e => { if (e){ const j = pool.indexOf(e); if (j >= 0) pool.splice(j, 1); } });
+    return fixed.map(e => e || pool.shift() || 'calidad');
+  }
+  function applySlot(a, i){
+    if (!planOn || !plan[i]) return; const sl = plan[i];
+    a.op = Object.assign({}, a.op);
+    ['tipofoto','escena','fondo','genero','personas','edad','rulo','piel','prodModo'].forEach(k => { if (sl[k] && sl[k] !== 'auto') a.op[k] = sl[k]; });
+    if ((!sl.tipofoto || sl.tipofoto === 'auto') && ['genero','personas','edad','piel'].some(k => sl[k] && sl[k] !== 'auto')) a.op.tipofoto = 'modelo';
+    if (sl.fondo && fondoInfo(sl.fondo, true)) a.bg = fondoInfo(sl.fondo)[0];
+    if (sl.layout && sl.layout !== 'auto'){ a.layout = sl.layout; a.layoutLocked = true; }
+    if (sl.prodId && sl.prodId !== 'auto'){ if (sl.prodId === 'none') a.showProd = false; else { a.prodId = sl.prodId; a.showProd = true; } }
+    if (sl.kind && sl.kind !== 'auto') a.kind = sl.kind;
+    if (sl.font && sl.font !== 'auto'){ a.font = sl.font; a.fontLocked = true; }
+    if (sl.enfoque && sl.enfoque !== 'auto') a.enfoque = sl.enfoque;
+  }
+  function generarManual(){
+    const fd = new FormData(form), g = k => String(fd.get(k) || '').trim(), n = Number(opt.cantidad) || 10, tanda = tandas + 1;
+    const enf = enfoques()[0] || 'calidad';
+    const ideas = ['smiling at the camera','touching the curls with both hands','laughing joyfully','looking over the shoulder','applying cream to the curls','eyes closed, enjoying the moment','playing with a curl','confident pose, hand on hip','holding the jar next to the cheek','walking and smiling'];
+    const nuevos = Array.from({length: n}, (_, i) => Object.assign(baseAd(tanda, i), {popVar: (i + tanda) % 4, source:'manual', enfoque: enf, nombre: 'Foto ' + (i + 1), kind: 'none', layout: opt.layout !== 'auto' ? opt.layout : layFor(i, tanda),
+      tag: g('m_tag'), h: g('m_h') || '[titular]', s: g('m_s'), cta: g('m_cta') || 'Comprar', primary: g('m_primary'), title: g('m_title'), button: g('m_button') || 'Comprar', hip: 'Mismo texto, otra foto: ¿qué imagen funciona mejor?', idea: ideas[(i + tanda * 3) % ideas.length]}));
+    nuevos.forEach((a, i) => { applySlot(a, i); a.id = 'M' + (i + 1); a.orig = snap(a); });
+    tandas = tanda; ads = nuevos.concat(ads); sel = nuevos[0].uid; renderAll(); persist(); nuevos.forEach(queueImage);
+  }
+  async function generar(){
+    if (busy) return;
+    if (opt.textos === 'yo'){ generarManual(); return; }
+    const n = Number(opt.cantidad) || 10, rep = reparto(n), tanda = tandas + 1;
+    const enfs = planOn ? planEnfoques(n) : null;
+    const pedido = enfs ? 'en este orden exacto: ' + enfs.map((e, i) => `${i + 1}) enfoque ${e}`).join('; ') : Object.entries(rep).filter(([, v]) => v).map(([k, v]) => `${v} con enfoque ${k}`).join(', ');
+    const prev = ads.slice(0, 60).map(a => '- ' + a.h).join('\n') || '(ninguno todavía)';
+    const prompt = `${RULES}\n\nBRIEF DEL PRODUCTO:\n${brief()}\n\nGenerá exactamente ${n} anuncios NUEVOS para Meta Ads: ${pedido}${rep.urgencia ? ' (urgencia = miedo a perderse la oferta)' : ''}. Cada uno con un ángulo distinto; cambiá solo el enfoque, nunca el producto. Tanda ${tanda}: ángulos y titulares diferentes a todos los anteriores.\n\nTITULARES YA USADOS (no los repitas):\n${prev}\n\nRespondé SOLO con un array JSON compacto (sin saltos de línea ni espacios extra) de ${n} objetos con esta forma, sin texto antes ni después:\n${SCHEMA}`;
+    busy = new AbortController(); setBusy(true);
+    status(`La IA está escribiendo ${n} anuncios nuevos… (puede tardar hasta un minuto)`, 'busy');
+    try {
+      const out = await aiText(prompt, busy.signal);
+      const arr = Array.isArray(out) ? out : (out && (out.anuncios || out.ads || out.data)) || null;
+      if (!Array.isArray(arr) || !arr.length) throw {code:'invalid_json'};
+      const ord = {precio:0, calidad:1, urgencia:2};
+      let nuevos = arr.slice(0, n).map((o, i) => normalize(o, tanda, i));
+      if (enfs){ nuevos.forEach((a, i) => { a.enfoque = enfs[i] || a.enfoque; applySlot(a, i); }); } else nuevos.sort((a, b) => ord[a.enfoque] - ord[b.enfoque]);
+      numerar(nuevos); tandas = tanda; ads = nuevos.concat(ads); sel = nuevos[0].uid;
+      status(`Textos listos. Ahora la IA crea las fotos, de a una.`, 'busy');
+      renderAll(); persist(); nuevos.forEach(queueImage);
+    } catch (e) {
+      if (e && e.code === 'cancelled') status('Generación detenida.');
+      else { status(errMsg(e) + ' Armé los textos con plantillas y la IA está creando las fotos. Después podés tocar "Otro texto" en cada anuncio.', 'err'); templateBatch(tanda, n); }
+    } finally { busy = null; setBusy(false); }
+  }
+  function templateBatch(tanda, n){
+    const d = data(), rep = reparto(n), t = tanda - 1, out = [];
+    if (planOn){ const enfs = planEnfoques(n), cnt = {precio:0, calidad:0, urgencia:0};
+      enfs.forEach((enf, i) => { const list = SLOTS.filter(x => x.enfoque === enf), sl = list[cnt[enf]++ % list.length], v = sl.v[(t + i) % sl.v.length](d);
+        const a = Object.assign(baseAd(tanda, i), {popVar: (i + tanda) % 4, source:'plantilla', enfoque:enf, nombre:sl.nombre, kind:sl.kind, hip:sl.hip, layout: opt.layout !== 'auto' ? opt.layout : layFor(i, tanda), idea: pick(['smiling at the camera','touching her curls','laughing joyfully','looking over her shoulder','applying cream to her curls'], i + t)}, v); applySlot(a, i); out.push(a); });
+      numerar(out); tandas = tanda; ads = out.concat(ads); sel = out[0] && out[0].uid; renderAll(); persist(); out.forEach(queueImage); return; }
+    ['precio','calidad','urgencia'].forEach(enf => {
+      SLOTS.filter(s => s.enfoque === enf).slice(0, rep[enf] || 0).forEach((s, i) => {
+        const v = s.v[(t + i) % s.v.length](d);
+        out.push(Object.assign(baseAd(tanda, out.length), {popVar: (out.length + tanda) % 4, source:'plantilla', enfoque:enf, nombre:s.nombre, kind:s.kind, hip:s.hip, layout: opt.layout !== 'auto' ? opt.layout : layFor(out.length, tanda), idea: pick(['smiling at the camera','touching her curls','laughing joyfully','looking over her shoulder','applying cream to her curls'], out.length + t)}, v));
+      });
+    });
+    numerar(out); tandas = tanda; ads = out.concat(ads); sel = out[0] && out[0].uid; renderAll(); persist(); out.forEach(queueImage);
+  }
+  async function otroTexto(a){
+    if (busy){ toast('Esperá a que termine la generación'); return; }
+    const prompt = `${RULES}\n\nBRIEF DEL PRODUCTO:\n${brief()}\n\nEscribí UN anuncio nuevo para Meta Ads con enfoque ${a.enfoque}, con un ángulo distinto a "${a.nombre}". No repitas estos titulares:\n${ads.slice(0, 60).map(x => '- ' + x.h).join('\n')}\n\nRespondé SOLO con un objeto JSON con esta forma:\n${SCHEMA}`;
+    busy = new AbortController(); setBusy(true); status('La IA está escribiendo otro texto para ' + a.id + '…', 'busy');
+    try {
+      const o = await aiText(prompt, busy.signal, 50000), n = normalize(Array.isArray(o) ? o[0] : o, a.tanda, 0);
+      ['nombre','kind','tag','h','s','cta','primary','title','button','hip','idea'].forEach(k => a[k] = n[k]);
+      if (!a.layoutLocked) a.layout = n.layout;
+      a.orig = snap(a); status('Texto nuevo listo para ' + a.id + '. Si querés una foto acorde, tocá "Otra foto".'); setTimeout(() => status(''), 4000);
+      renderAll(); persist();
+    } catch (e) { if (!e || e.code !== 'cancelled') status(errMsg(e), 'err'); }
+    finally { busy = null; setBusy(false); }
+  }
+  function otraFoto(a){ a.seed = Math.floor(Math.random() * 1e9); a.op = a.op || Object.assign({}, opt); queueImage(a); toast('Creando otra foto para ' + a.id + '…'); }
+  function setBusy(on){ ['#btnGen'].forEach(s => { const b = $(s); if (b){ b.disabled = on; } }); $('#btnGen').textContent = on ? 'Generando…' : (opt.textos === 'yo' ? 'Generar anuncios con mi texto' : ads.length ? 'Generar más anuncios' : 'Generar anuncios con IA'); $('#btnStop').hidden = !on; }
+  function status(msg, kind){
+    const el = $('#status'); if (!msg){ el.hidden = true; el.textContent = ''; return; }
+    el.hidden = false; el.className = 'status' + (kind === 'err' ? ' err' : '');
+    el.innerHTML = (kind === 'busy' ? '<span class="dot" aria-hidden="true"></span>' : '') + '<span></span>'; el.lastChild.textContent = msg;
+  }
+
+  // ---------- Dibujo del anuncio ----------
+  const SANS = "'Plus Jakarta Sans', Inter, system-ui, sans-serif", SERIF = "Fraunces, Georgia, serif";
+  function rr(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+  function wrap(ctx, text, maxW){ const words = String(text).split(/[ \n\t]+/), lines = []; let line = ''; for (const w of words){ const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line){ lines.push(line); line = w; } else line = t; } if (line) lines.push(line); return lines; }
+  function fit(ctx, text, font, size, maxW, maxLines, min){ let lines; do { ctx.font = font(size); lines = wrap(ctx, text, maxW); if (lines.length <= maxLines) break; size -= 4; } while (size > min); return {lines, size}; }
+  function lum(h){ if (!/^#[0-9a-f]{6}$/i.test(h || '')) return .5; const c = [1,3,5].map(i => parseInt(h.substr(i,2),16)/255).map(v => v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4)); return .2126*c[0]+.7152*c[1]+.0722*c[2]; }
+  const onAcc = c => lum(c) > .42 ? '#2A1620' : '#FFFFFF';
+  const IMGS = {};
+  function imgFor(a, cb){
+    if (!a.img){ a.imgEl = null; return; }
+    let e = IMGS[a.img]; if (e && e.im.complete && e.im.naturalWidth){ a.imgEl = e.im; return; }
+    if (!e){ e = IMGS[a.img] = {im: new Image(), cbs: []}; e.im.onload = () => { const l = e.cbs; e.cbs = []; l.forEach(f => f(e.im)); }; e.im.src = a.img; }
+    e.cbs.push(im => { a.imgEl = im; cb && cb(); });
+  }
+  const SCRIPT = "'Caveat Brush', 'Comic Sans MS', cursive";
+  function rnd(seed){ let x = seed % 2147483647 || 1; return () => (x = x * 16807 % 2147483647) / 2147483647; }
+  function brush(ctx, x, y, w, h, color, rot, seed){
+    const r = rnd(seed || 7); ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(rot); ctx.fillStyle = color; ctx.beginPath();
+    const n = 14; ctx.moveTo(-w / 2, -h / 2 + r() * 10);
+    for (let i = 1; i <= n; i++) ctx.lineTo(-w / 2 + w * i / n, -h / 2 + (r() - .5) * 12);
+    ctx.lineTo(w / 2 + 6 + r() * 10, 0);
+    for (let i = n; i >= 0; i--) ctx.lineTo(-w / 2 + w * i / n, h / 2 + (r() - .5) * 12);
+    ctx.lineTo(-w / 2 - 6 - r() * 10, 0); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  function marker(ctx, x1, y, x2, color){ ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x1, y + 4); ctx.quadraticCurveTo((x1 + x2) / 2, y - 10, x2, y); ctx.stroke(); ctx.restore(); }
+  function icono(ctx, cx, cy, kind, color){
+    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.arc(cx, cy, 38, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath();
+    if (kind === 0){ ctx.moveTo(cx, cy - 18); ctx.bezierCurveTo(cx + 18, cy - 4, cx + 14, cy + 14, cx, cy + 18); ctx.bezierCurveTo(cx - 14, cy + 14, cx - 18, cy - 4, cx, cy - 18); }
+    else if (kind === 1){ ctx.moveTo(cx - 16, cy - 16); ctx.lineTo(cx + 16, cy - 16); ctx.lineTo(cx + 16, cy + 2); ctx.quadraticCurveTo(cx + 16, cy + 18, cx, cy + 20); ctx.quadraticCurveTo(cx - 16, cy + 18, cx - 16, cy + 2); ctx.closePath(); ctx.moveTo(cx - 7, cy); ctx.lineTo(cx - 1, cy + 6); ctx.lineTo(cx + 9, cy - 6); }
+    else { for (let k = -1; k <= 1; k++){ ctx.moveTo(cx - 16 + k * 2, cy + k * 12); ctx.bezierCurveTo(cx - 6, cy - 8 + k * 12, cx + 6, cy + 8 + k * 12, cx + 16, cy + k * 12); } }
+    ctx.stroke(); ctx.restore();
+  }
+  function drawPhoto(ctx, im, dx, dy, dw, dh, a, focus){
+    const fx = a.fx || {}, z = Math.max(1, (fx.zoom || 100) / 100), fy = fx.posY != null ? fx.posY / 100 : focus;
+    const ir = im.width / im.height, br = dw / dh; let sw, sh;
+    if (ir > br){ sh = im.height; sw = sh * br; } else { sw = im.width; sh = sw / br; }
+    sw /= z; sh /= z; const sx = (im.width - sw) / 2, sy = Math.max(0, Math.min(im.height - sh, (im.height - sh) * fy));
+    ctx.save(); ctx.filter = `brightness(${1 + (fx.brillo || 0) / 100}) contrast(${1 + (fx.contraste || 0) / 100}) saturate(${1 + (fx.satur || 0) / 100})`;
+    ctx.drawImage(im, sx, sy, sw, sh, dx, dy, dw, dh); ctx.restore();
+    const w = fx.calidez || 0;
+    if (w){ ctx.save(); ctx.globalCompositeOperation = 'soft-light'; ctx.fillStyle = w > 0 ? `rgba(255,140,40,${Math.abs(w) / 100 * .7})` : `rgba(40,120,255,${Math.abs(w) / 100 * .7})`; ctx.fillRect(dx, dy, dw, dh); ctx.restore(); }
+    if (fx.vineta){ const g = ctx.createRadialGradient(dx + dw / 2, dy + dh / 2, Math.min(dw, dh) * .35, dx + dw / 2, dy + dh / 2, Math.max(dw, dh) * .75); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${fx.vineta / 100 * .6})`); ctx.fillStyle = g; ctx.fillRect(dx, dy, dw, dh); }
+  }
+  function antesDespues(ctx, a, x, y, w, h){
+    const t = (a.op || {}).tipofoto; if (t !== 'antesdespues' || !a.imgEl) return;
+    const lab = (txt, cx, bg, fg) => { ctx.font = `800 34px ${SANS}`; const tw = ctx.measureText(txt).width + 44; ctx.fillStyle = bg; rr(ctx, cx - tw / 2, y + h * .58, tw, 62, 31); ctx.fill(); ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.fillText(txt, cx, y + h * .58 + 43); ctx.textAlign = 'left'; };
+    ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(x + w / 2, y + 20); ctx.lineTo(x + w / 2, y + h - 20); ctx.stroke(); ctx.restore();
+    lab('ANTES', x + w * .25, 'rgba(27,20,24,.85)', '#fff'); lab('DESPUÉS', x + w * .75, a.acc || '#D9434F', onAcc(a.acc || '#D9434F'));
+    ctx.font = `500 20px ${SANS}`; ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.textAlign = 'center'; ctx.fillText('Imagen ilustrativa generada con IA', x + w / 2, y + h - 236); ctx.textAlign = 'left';
+  }
+  function drawProd(ctx, a, W, H, yBottom, base){
+    const P = prodOf(a); if (!P || a.showProd === false || a.integrado) return;
+    const mult = {S:.7, M:1, L:1.3}[a.prodSize || 'M'] || 1;
+    let ph = Math.min(base * mult, H * .42), pw = ph * P.width / P.height;
+    if (pw > W * .48){ pw = W * .48; ph = pw * P.height / P.width; }
+    const x = a.prodPos === 'izq' ? 56 : W - pw - 56, y = yBottom - ph;
+    ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.filter = 'blur(14px)'; ctx.beginPath(); ctx.ellipse(x + pw / 2, yBottom - 4, pw * .42, 16, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.22)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 10; ctx.drawImage(P, x, y, pw, ph); ctx.restore();
+  }
+  function brandMark(ctx, a, W, d){
+    if (!a.showLogo) return;
+    if (logo){ const lh = 84, lw = Math.min(320, lh * logo.width / logo.height); ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 12; ctx.drawImage(logo, (W - lw) / 2, 50, lw, lh); ctx.restore(); return; }
+    const t = (d.marca || '').toLowerCase().replace(/\s+/g, ''); ctx.font = `800 40px ${SANS}`; const w = ctx.measureText(t).width + 56;
+    ctx.fillStyle = 'rgba(255,255,255,.93)'; rr(ctx, (W - w) / 2, 52, w, 66, 33); ctx.fill(); ctx.fillStyle = '#1B1418'; ctx.textAlign = 'center'; ctx.fillText(t, W / 2, 99); ctx.textAlign = 'left';
+  }
+  function drawPop(ctx, a, W, H, d, acc){
+    const SANS = bodyFont(a);
+    const bg = a.bg || '#F7C6D9', ink = '#1B1418', X = 70;
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    const pTop = Math.round(H * (H > 1500 ? .42 : H > 1200 ? .40 : .36));
+    if (a.imgEl){
+      drawPhoto(ctx, a.imgEl, 0, pTop - 140, W, H - pTop + 140, a, .35); antesDespues(ctx, a, 0, pTop - 140, W, H - pTop + 140);
+      const g = ctx.createLinearGradient(0, pTop - 140, 0, pTop + 120); g.addColorStop(0, bg); g.addColorStop(1, bg + '00'); ctx.fillStyle = g; ctx.fillRect(0, pTop - 140, W, 262);
+    } else {
+      ctx.fillStyle = 'rgba(27,20,24,.45)'; ctx.font = `600 34px ${SANS}`; ctx.textAlign = 'center';
+      ctx.fillText(a.imgState === 'error' ? 'No se pudo crear la foto · tocá "Otra foto"' : a.imgState ? 'La IA está creando la foto…' : 'Sin foto', W / 2, pTop + (H - pTop) / 2); ctx.textAlign = 'left';
+    }
+    // Marca arriba
+    if (a.showLogo){
+      if (logo){ const lh = 90, lw = Math.min(360, lh * logo.width / logo.height); ctx.drawImage(logo, (W - lw) / 2, 50, lw, lh); }
+      else { ctx.fillStyle = ink; ctx.font = `800 50px ${SANS}`; ctx.textAlign = 'center'; ctx.fillText((d.marca || '').toLowerCase().replace(/\s+/g, ''), W / 2, 112); ctx.textAlign = 'left'; }
+    }
+    // Titular: 4 variantes de diseño para que no se vean todos iguales
+    const pv = a.popVar != null ? a.popVar % 4 : 0, hsc = a.hScale || 1;
+    let y = 190 + Math.max(0, (pTop - 600) * .25);
+    if (pv === 1){
+      const HF = fontFn(a), hd = fit(ctx, (FONTS[a.font] || {}).f && /Pacifico|Caveat|Marker|Shrikhand/.test(FONTS[a.font].f) ? a.h : a.h.toUpperCase(), HF, 86 * fontK(a) * hsc, W - 2 * X - 20, 3, 46);
+      ctx.font = HF(hd.size); ctx.textAlign = 'center';
+      hd.lines.forEach((l, i) => { y += hd.size * 1.12; const lw = ctx.measureText(l).width; brush(ctx, W / 2 - lw / 2 - 18, y - hd.size * .86, lw + 36, hd.size * 1.04, i % 2 ? '#FFFFFF' : acc, (i % 2 ? .015 : -.02), a.seed + i); ctx.fillStyle = i % 2 ? ink : onAcc(acc); ctx.fillText(l, W / 2, y); });
+      ctx.textAlign = 'left'; y += 56;
+      if (a.s){ ctx.fillStyle = ink; ctx.font = `600 34px ${SANS}`; ctx.textAlign = 'center'; wrap(ctx, a.s, W - 2 * X - 60).slice(0, 2).forEach(l => { ctx.fillText(l, W / 2, y); y += 44; }); ctx.textAlign = 'left'; }
+    } else if (pv === 2){
+      const HF = fontFn(a), hd = fit(ctx, fontTxt(a, a.h), HF, 104 * fontK(a) * hsc, W - 2 * X - 20, 3, 56);
+      ctx.font = HF(hd.size); ctx.fillStyle = ink; ctx.textAlign = 'center';
+      hd.lines.forEach((l, i) => { y += hd.size * 1.02; ctx.fillText(l, W / 2, y); if (i === 0){ const lw = ctx.measureText(l).width; ctx.save(); ctx.strokeStyle = acc; ctx.lineWidth = 6; ctx.beginPath(); ctx.ellipse(W / 2, y - hd.size * .32, lw / 2 + 34, hd.size * .66, -.04, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); } });
+      ctx.textAlign = 'left'; y += 60;
+      if (a.s){ ctx.fillStyle = ink; ctx.font = `italic 500 34px ${SERIF}`; ctx.textAlign = 'center'; wrap(ctx, a.s, W - 2 * X - 60).slice(0, 2).forEach(l => { ctx.fillText(l, W / 2, y); y += 44; }); ctx.textAlign = 'left'; }
+    } else if (pv === 3){
+      const HF = fontFn(a), hd = fit(ctx, fontTxt(a, a.h), HF, 118 * fontK(a) * hsc, W - 2 * X - 120, 3, 60);
+      ctx.save(); ctx.translate(W - X, 0); ctx.rotate(.035); ctx.font = HF(hd.size); ctx.textAlign = 'right';
+      hd.lines.forEach((l, i) => { y += hd.size * .95; const lw = ctx.measureText(l).width; if (i === hd.lines.length - 1){ ctx.save(); ctx.globalAlpha = .55; ctx.fillStyle = acc; ctx.fillRect(-lw - 10, y - hd.size * .35, lw + 20, hd.size * .32); ctx.restore(); } ctx.fillStyle = ink; ctx.fillText(l, 0, y); });
+      ctx.restore(); ctx.textAlign = 'left'; y += 66;
+      if (a.s){ ctx.fillStyle = ink; ctx.font = `500 34px ${SANS}`; ctx.textAlign = 'right'; wrap(ctx, a.s, W - 2 * X - 140).slice(0, 2).forEach(l => { ctx.fillText(l, W - X, y); y += 44; }); ctx.textAlign = 'left'; }
+    } else {
+      const HF = fontFn(a), hd = fit(ctx, fontTxt(a, a.h), HF, 124 * fontK(a) * hsc, W - 2 * X - 20, 3, 62);
+      ctx.save(); ctx.translate(X, 0); ctx.rotate(-0.045);
+      ctx.fillStyle = ink; ctx.font = HF(hd.size);
+      hd.lines.forEach((l, i) => { y += hd.size * .92; ctx.fillText(l, 0, y + i * 6); if (i === hd.lines.length - 1){ const lw = ctx.measureText(l).width; marker(ctx, lw * .35, y + i * 6 + 22, lw + 6, acc); } });
+      ctx.restore(); y += 70;
+      if (a.s){ ctx.fillStyle = ink; ctx.font = `500 36px ${SANS}`; wrap(ctx, a.s, W - 2 * X - 120).slice(0, 2).forEach(l => { ctx.fillText(l, X + 6, y); y += 46; }); }
+    }
+    // Producto real
+    drawProd(ctx, a, W, H, H - 210, 520);
+    // Sticker / banda según el tipo
+    const sr = 112, sx2 = W - X - sr + 10, sy2 = pTop + 40;
+    if (a.kind === 'price' && a.showPrice){
+      ctx.save(); ctx.translate(sx2, sy2); ctx.rotate(.12); ctx.fillStyle = acc; ctx.beginPath(); ctx.arc(0, 0, sr + 10, 0, Math.PI * 2); ctx.fill();
+      const ik = onAcc(acc); ctx.fillStyle = ik; ctx.textAlign = 'center'; ctx.font = `400 34px ${SCRIPT}`; ctx.fillText('antes ' + d.L, 0, -34); ctx.font = `400 74px ${SCRIPT}`; ctx.fillText(d.O, 0, 36); ctx.restore(); ctx.textAlign = 'left';
+    } else if (a.kind === 'deadline' || a.kind === 'stock' || a.enfoque === 'urgencia'){
+      const txt = a.band || (a.kind === 'stock' ? '¡Últimas unidades!' : '¡No te la pierdas!');
+      ctx.font = `400 56px ${SCRIPT}`; const tw = ctx.measureText(txt).width + 70, by = H - 360;
+      brush(ctx, (W - tw) / 2, by, tw, 92, ink, -0.06, a.seed); ctx.save(); ctx.translate(W / 2, by + 46); ctx.rotate(-0.06); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(txt, 0, 18); ctx.restore(); ctx.textAlign = 'left';
+      if (a.kind === 'deadline'){ ctx.fillStyle = ink; ctx.font = `600 30px ${SANS}`; ctx.textAlign = 'center'; ctx.fillText('Hasta ' + d.fin, W / 2, by + 150); ctx.textAlign = 'left'; }
+    } else if (a.tag){
+      ctx.save(); ctx.translate(sx2, sy2); ctx.rotate(.12); ctx.fillStyle = acc; ctx.beginPath(); ctx.arc(0, 0, sr, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = onAcc(acc); ctx.textAlign = 'center'; const tl = fit(ctx, a.tag, s => `400 ${s}px ${SCRIPT}`, 56, sr * 1.6, 2, 30);
+      ctx.font = `400 ${tl.size}px ${SCRIPT}`; tl.lines.forEach((l, i) => ctx.fillText(l, 0, (i - (tl.lines.length - 1) / 2) * tl.size * .95 + tl.size * .3)); ctx.restore(); ctx.textAlign = 'left';
+    }
+    // Íconos de beneficios
+    if (a.kind === 'checks'){
+      const by = H - 380, bw = W - 2 * X - (prodOf(a) && a.showProd !== false && !a.integrado ? W * .42 - 20 : 0), bx0 = prodOf(a) && a.showProd !== false && !a.integrado && a.prodPos === 'izq' ? W - X - bw : X; ctx.fillStyle = 'rgba(255,255,255,.88)'; rr(ctx, bx0, by, bw, 170, 28); ctx.fill();
+      d.beneficios.slice(0, 3).forEach((b, i) => { const cx = bx0 + bw * (i + .5) / 3; icono(ctx, cx, by + 62, i, ink); ctx.fillStyle = ink; ctx.font = `600 24px ${SANS}`; ctx.textAlign = 'center'; ctx.fillText(b.length > 22 ? b.slice(0, 21) + '…' : b, cx, by + 138); });
+      ctx.textAlign = 'left';
+    }
+    // Botón negro centrado
+    ctx.font = `700 34px ${SANS}`; const cw = ctx.measureText(a.cta).width + 120, cx0 = (W - cw) / 2, cy0 = H - 170;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 20; ctx.fillStyle = ink; rr(ctx, cx0, cy0, cw, 90, 45); ctx.fill(); ctx.restore();
+    ctx.fillStyle = '#fff'; ctx.fillText(a.cta, cx0 + 40, cy0 + 57); ctx.strokeStyle = '#fff'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); const ax = cx0 + cw - 62; ctx.moveTo(ax, cy0 + 45); ctx.lineTo(ax + 24, cy0 + 45); ctx.moveTo(ax + 13, cy0 + 33); ctx.lineTo(ax + 25, cy0 + 45); ctx.lineTo(ax + 13, cy0 + 57); ctx.stroke();
+  }
+  function draw(cv, a){
+    const W = 1080, H = FORMATOS[formato].h, k = cv.width / W, ctx = cv.getContext('2d'), SANS = bodyFont(a);
+    ctx.setTransform(k, 0, 0, k, 0, 0); ctx.clearRect(0, 0, W, H);
+    const d = data(), acc = a.acc || opt.acento, display = fontFn(a);
+    const off = (H - 1080) / 2, X = 72;
+    if ((a.layout || '') === 'pop'){ drawPop(ctx, a, W, H, d, acc); ctx.setTransform(1, 0, 0, 1, 0, 0); return; }
+    // Foto
+    const lay0 = a.layout || 'editorial', bandH = lay0 === 'banda' ? Math.round(H * (H > 1500 ? .34 : H > 1200 ? .38 : .42)) : 0;
+    if (a.imgEl){
+      drawPhoto(ctx, a.imgEl, 0, bandH, W, H - bandH, a, .45); antesDespues(ctx, a, 0, bandH, W, H - bandH);
+    } else {
+      const g = ctx.createLinearGradient(0, 0, W, H); g.addColorStop(0, a.bg || '#F7B98B'); g.addColorStop(1, '#FBEDE4'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(42,22,32,.55)'; ctx.font = `600 34px ${SANS}`; ctx.textAlign = 'center';
+      const m = a.imgState === 'error' ? 'No se pudo crear la foto · tocá "Otra foto"' : a.imgState === 'cola' ? 'Foto en cola…' : a.imgState === 'cargando' ? 'La IA está creando la foto…' : 'Sin foto';
+      ctx.fillText(m, W / 2, a.layout === 'impacto' ? H * .62 : a.layout === 'banda' ? bandH + (H - bandH) / 2 : H * .36); ctx.textAlign = 'left';
+    }
+    const white = '#FFFFFF', lay = a.layout || 'editorial';
+
+    // Precio (sello)
+    if (a.showPrice && a.kind === 'price'){
+      const r = 128, cx = W - 72 - r, cy = (lay === 'impacto' || lay === 'centrado' ? H - 330 : lay === 'banda' ? bandH + r + 40 : 72 + r);
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.22)'; ctx.shadowBlur = 24; ctx.fillStyle = acc; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      const ink = onAcc(acc); ctx.fillStyle = ink; ctx.textAlign = 'center';
+      ctx.font = `600 30px ${SANS}`; ctx.globalAlpha = .8; ctx.fillText(d.L, cx, cy - 40); const lw = ctx.measureText(d.L).width; ctx.fillRect(cx - lw / 2, cy - 51, lw, 3); ctx.globalAlpha = 1;
+      ctx.font = `800 62px ${SANS}`; ctx.fillText(d.O, cx, cy + 26); ctx.font = `700 22px ${SANS}`; ctx.fillText(d.pct + '% OFF', cx, cy + 64); ctx.textAlign = 'left';
+    }
+    // Bloque de texto
+    const chips = [];
+    if (a.kind === 'deadline') chips.push('Termina ' + d.fin);
+    if (a.kind === 'stock') chips.push('Últimas unidades de esta tanda');
+    const ctaW = (ctx.font = `700 30px ${SANS}`, ctx.measureText(a.cta).width + 100);
+    function cta(x, y, bg, fg){ ctx.fillStyle = bg; rr(ctx, x, y, ctaW, 84, 42); ctx.fill(); ctx.fillStyle = fg; ctx.font = `700 30px ${SANS}`; ctx.fillText(a.cta, x + 36, y + 53); ctx.strokeStyle = fg; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); const ax = x + ctaW - 52; ctx.moveTo(ax, y + 42); ctx.lineTo(ax + 22, y + 42); ctx.moveTo(ax + 12, y + 31); ctx.lineTo(ax + 23, y + 42); ctx.lineTo(ax + 12, y + 53); ctx.stroke(); }
+    function tagPill(x, y, bg, fg){ ctx.font = `800 22px ${SANS}`; const t = a.tag.toUpperCase(), tw = ctx.measureText(t).width + 40; ctx.fillStyle = bg; rr(ctx, x, y, tw, 46, 23); ctx.fill(); ctx.fillStyle = fg; ctx.fillText(t, x + 20, y + 31); }
+    function chipRow(x, y, bg, fg){ ctx.font = `700 26px ${SANS}`; chips.forEach(c => { const cw = ctx.measureText(c).width + 40; ctx.fillStyle = bg; rr(ctx, x, y, cw, 52, 26); ctx.fill(); ctx.fillStyle = fg; ctx.fillText(c, x + 20, y + 35); }); return chips.length ? 70 : 0; }
+    function checks(x, y, color, mark){ ctx.font = `600 30px ${SANS}`; d.beneficios.forEach((b, i) => { const cy = y + i * 48; ctx.strokeStyle = mark; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, cy - 8); ctx.lineTo(x + 9, cy + 2); ctx.lineTo(x + 26, cy - 18); ctx.stroke(); ctx.fillStyle = color; ctx.fillText(b, x + 44, cy + 2); }); return a.kind === 'checks' ? d.beneficios.length * 48 + 10 : 0; }
+    if (lay === 'tarjeta'){
+      const cw = W - 96, maxW = cw - 112;
+      const hd = fit(ctx, fontTxt(a, a.h), display, 76 * fontK(a) * (a.hScale || 1), maxW, 3, 46);
+      ctx.font = `500 30px ${SANS}`; const sub = a.s ? wrap(ctx, a.s, maxW).slice(0, 2) : [];
+      const chH = a.kind === 'checks' ? d.beneficios.length * 48 + 10 : 0;
+      const chipH = chips.length ? 70 : 0;
+      const ch = 56 + 46 + 26 + hd.lines.length * hd.size * 1.05 + (sub.length ? 16 + sub.length * 40 : 0) + chH + chipH + 30 + 84 + 56;
+      const cy = H - 48 - ch;
+      drawProd(ctx, a, W, H, cy + 60, 380);
+      ctx.save(); ctx.shadowColor = 'rgba(42,22,32,.25)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 12; ctx.fillStyle = '#FFFBF8'; rr(ctx, 48, cy, cw, ch, 36); ctx.fill(); ctx.restore();
+      let y = cy + 56; tagPill(48 + 56, y, acc, onAcc(acc)); y += 46 + 26;
+      ctx.fillStyle = '#2A1620'; ctx.font = display(hd.size); hd.lines.forEach(l => { y += hd.size; ctx.fillText(l, 48 + 56, y); y += hd.size * .05; });
+      if (sub.length){ y += 16; ctx.font = `500 30px ${SANS}`; ctx.fillStyle = '#6E5560'; sub.forEach(l => { y += 36; ctx.fillText(l, 48 + 56, y); y += 4; }); }
+      if (a.kind === 'checks'){ y += 44; checks(48 + 56, y, '#2A1620', acc); y += d.beneficios.length * 48 - 30; }
+      if (chips.length){ y += 22; chipRow(48 + 56, y, '#F6E6DD', '#2A1620'); y += 52; }
+      cta(48 + 56, cy + ch - 56 - 84, '#2A1620', '#FFFFFF');
+      if (a.showLogo){ ctx.font = `600 26px ${SANS}`; ctx.fillStyle = '#6E5560'; ctx.textAlign = 'right'; ctx.fillText(d.tienda, 48 + cw - 56, cy + ch - 56 - 30); ctx.textAlign = 'left'; }
+    } else if (lay === 'impacto'){
+      const g = ctx.createLinearGradient(0, 0, 0, H * .62); g.addColorStop(0, 'rgba(20,10,16,.78)'); g.addColorStop(1, 'rgba(20,10,16,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H * .62);
+      const g2 = ctx.createLinearGradient(0, H - 300, 0, H); g2.addColorStop(0, 'rgba(20,10,16,0)'); g2.addColorStop(1, 'rgba(20,10,16,.6)'); ctx.fillStyle = g2; ctx.fillRect(0, H - 300, W, 300);
+      let y = (a.showLogo ? 160 : 90) + off * .3;
+      tagPill(X, y, acc, onAcc(acc)); y += 46 + 20;
+      const hd = fit(ctx, ['moderna','archivo','anton','bebas'].includes(a.font) ? a.h.toUpperCase() : a.h, display, 98 * fontK(a) * (a.hScale || 1), W - 2 * X, 4, 52);
+      ctx.fillStyle = white; ctx.font = display(hd.size); ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 16;
+      hd.lines.forEach(l => { y += hd.size * .98; ctx.fillText(l, X, y); }); ctx.shadowBlur = 0;
+      ctx.fillStyle = acc; ctx.fillRect(X, y + 22, 120, 10); y += 40;
+      if (a.s){ ctx.font = `500 32px ${SANS}`; ctx.fillStyle = 'rgba(255,255,255,.92)'; wrap(ctx, a.s, W - 2 * X).slice(0, 2).forEach(l => { y += 42; ctx.fillText(l, X, y); }); }
+      if (a.kind === 'checks'){ y += 56; checks(X, y, white, acc); }
+      if (chips.length){ chipRow(X, H - 72 - 84 - 70, 'rgba(255,255,255,.92)', '#2A1620'); }
+      drawProd(ctx, a, W, H, H - 60, 420);
+      cta(X, H - 72 - 84, acc, onAcc(acc));
+      if (a.showLogo){ ctx.font = `600 26px ${SANS}`; ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.textAlign = 'right'; ctx.fillText(d.tienda, W - X, H - 72 - 30); ctx.textAlign = 'left'; }
+    } else if (lay === 'banda'){
+      const band = (a.seed || 0) % 2 ? acc : (a.bg || '#FBE3D6'), ink = onAcc(band);
+      ctx.fillStyle = band; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(W, 0); ctx.lineTo(W, bandH - 30); ctx.quadraticCurveTo(W / 2, bandH + 40, 0, bandH - 30); ctx.closePath(); ctx.fill();
+      let y = a.showLogo ? 150 : 70;
+      tagPill(X, y, ink, band); y += 46 + 14;
+      const room = bandH - y - 40, sub0 = a.s ? 1 : 0;
+      const hd = fit(ctx, fontTxt(a, a.h), display, 92 * fontK(a) * (a.hScale || 1), W - 2 * X, room > 300 ? 3 : 2, 44);
+      ctx.fillStyle = ink; ctx.font = display(hd.size); hd.lines.forEach(l => { y += hd.size * .98; ctx.fillText(l, X, y); });
+      if (a.s && y + 50 < bandH - 20){ ctx.font = `500 30px ${SANS}`; ctx.globalAlpha = .85; wrap(ctx, a.s, W - 2 * X).slice(0, y + 100 < bandH - 20 ? 2 : sub0).forEach(l => { y += 40; ctx.fillText(l, X, y); }); ctx.globalAlpha = 1; }
+      if (a.kind === 'checks'){ const cy = H - 72 - 84 - 40 - d.beneficios.length * 48; ctx.fillStyle = 'rgba(255,255,255,.9)'; rr(ctx, X - 20, cy - 40, W * .55, d.beneficios.length * 48 + 30, 24); ctx.fill(); checks(X, cy, '#2A1620', acc); }
+      if (chips.length){ chipRow(X, H - 72 - 84 - 70, 'rgba(255,255,255,.92)', '#2A1620'); }
+      drawProd(ctx, a, W, H, H - 60, 420);
+      cta(X, H - 72 - 84, band, ink);
+    } else if (lay === 'centrado'){
+      const g = ctx.createLinearGradient(0, 0, 0, H * .58); g.addColorStop(0, 'rgba(255,251,248,.96)'); g.addColorStop(.6, 'rgba(255,251,248,.75)'); g.addColorStop(1, 'rgba(255,251,248,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H * .58);
+      let y = (a.showLogo ? 150 : 80) + off * .25;
+      ctx.font = `800 22px ${SANS}`; const tt = a.tag.toUpperCase(), tw = ctx.measureText(tt).width + 40; ctx.fillStyle = acc; rr(ctx, (W - tw) / 2, y, tw, 46, 23); ctx.fill(); ctx.fillStyle = onAcc(acc); ctx.textAlign = 'center'; ctx.fillText(tt, W / 2, y + 31); y += 46 + 14;
+      const hd = fit(ctx, fontTxt(a, a.h), display, 100 * fontK(a) * (a.hScale || 1), W - 2 * X - 40, 3, 48);
+      ctx.fillStyle = '#2A1620'; ctx.font = display(hd.size); hd.lines.forEach(l => { y += hd.size; ctx.fillText(l, W / 2, y); });
+      ctx.fillStyle = acc; ctx.fillRect(W / 2 - 50, y + 22, 100, 8); y += 34;
+      if (a.s){ ctx.font = `500 32px ${SANS}`; ctx.fillStyle = '#4A3540'; wrap(ctx, a.s, W - 2 * X - 60).slice(0, 2).forEach(l => { y += 42; ctx.fillText(l, W / 2, y); }); }
+      ctx.textAlign = 'left';
+      if (a.kind === 'checks'){ const cy = H - 72 - 84 - 50 - d.beneficios.length * 48; ctx.fillStyle = 'rgba(255,251,248,.92)'; rr(ctx, X - 20, cy - 40, W * .55, d.beneficios.length * 48 + 30, 24); ctx.fill(); checks(X, cy, '#2A1620', acc); }
+      if (chips.length){ chipRow(X, H - 72 - 84 - 70, 'rgba(255,255,255,.92)', '#2A1620'); }
+      drawProd(ctx, a, W, H, H - 72 - 84 - 24, 400);
+      cta((W - ctaW) / 2, H - 72 - 84, '#2A1620', '#FFFFFF');
+    } else {
+      // editorial
+      const hd = fit(ctx, fontTxt(a, a.h), display, 90 * fontK(a) * (a.hScale || 1), W - 2 * X - 40, 3, 48);
+      ctx.font = `500 32px ${SANS}`; const sub = a.s ? wrap(ctx, a.s, W - 2 * X).slice(0, 2) : [];
+      const chH = a.kind === 'checks' ? d.beneficios.length * 48 + 20 : 0, chipH = chips.length ? 70 : 0;
+      const block = 46 + 22 + hd.lines.length * hd.size + (sub.length ? 14 + sub.length * 42 : 0) + chH + chipH + 36 + 84;
+      const top = H - 72 - block;
+      drawProd(ctx, a, W, H, top - 10, 360);
+      const g = ctx.createLinearGradient(0, top - 260, 0, H); g.addColorStop(0, 'rgba(20,10,16,0)'); g.addColorStop(.45, 'rgba(20,10,16,.55)'); g.addColorStop(1, 'rgba(20,10,16,.85)'); ctx.fillStyle = g; ctx.fillRect(0, top - 260, W, H - top + 260);
+      let y = top; tagPill(X, y, acc, onAcc(acc)); y += 46 + 22;
+      ctx.fillStyle = white; ctx.font = display(hd.size); hd.lines.forEach(l => { y += hd.size * .98; ctx.fillText(l, X, y); });
+      if (sub.length){ y += 14; ctx.font = `500 32px ${SANS}`; ctx.fillStyle = 'rgba(255,255,255,.9)'; sub.forEach(l => { y += 40; ctx.fillText(l, X, y); }); }
+      if (a.kind === 'checks'){ y += 56; checks(X, y, white, acc); y += d.beneficios.length * 48 - 28; }
+      if (chips.length){ y += 24; chipRow(X, y, 'rgba(255,255,255,.92)', '#2A1620'); }
+      cta(X, H - 72 - 84, '#FFFFFF', '#2A1620');
+      if (a.showLogo){ ctx.font = `600 26px ${SANS}`; ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.textAlign = 'right'; ctx.fillText(d.tienda, W - X, H - 72 - 30); ctx.textAlign = 'left'; }
+    }
+    brandMark(ctx, a, W, d);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  // ---------- Interfaz ----------
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const current = () => ads.find(a => a.uid === sel) || ads[0] || null;
+  const ICON = {
+    img: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>',
+    txt: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></svg>',
+    dl: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>',
+    cp: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+    up: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9M7 14l5-5 5 5M5 3h14"/></svg>'
+  };
+  function renderAll(){ renderStage(); renderCtrl(); renderStrip(); renderCollage(); renderFavs(); setBusy(!!busy); placeGen(); }
+  function renderFavs(){
+    const g = $('#favsG'); if (!g) return; const favs = ads.filter(a => a.fav), H = FORMATOS[formato].h;
+    $('#favN').textContent = favs.length;
+    if (!favs.length){ g.innerHTML = '<div class="favs-empty">Todavía no marcaste favoritos. Tocá "☆ Marcar favorito" en un anuncio y aparece acá.</div>'; return; }
+    g.innerHTML = favs.map(a => `<div class="fcard" data-uid="${a.uid}"><canvas width="300" height="${Math.round(300 * H / 1080)}" title="Editar este anuncio"></canvas><b>${esc(a.id)} · ${esc(a.h)}</b><div class="row"><button class="btn sm" type="button" data-fe="${a.uid}">Editar</button><button class="btn sm" type="button" data-fd="${a.uid}">Descargar</button><button class="btn sm" type="button" data-fq="${a.uid}" aria-label="Quitar de favoritos">Quitar ★</button></div></div>`).join('');
+    g.querySelectorAll('.fcard').forEach(card => { const a = ads.find(x => x.uid === card.dataset.uid), cv = card.querySelector('canvas'); imgFor(a, () => draw(cv, a)); draw(cv, a); cv.onclick = () => card.querySelector('[data-fe]').click(); });
+    g.querySelectorAll('[data-fe]').forEach(b => b.onclick = () => { sel = b.dataset.fe; renderAll(); $('#estudio').scrollIntoView({behavior:'smooth'}); });
+    g.querySelectorAll('[data-fd]').forEach(b => b.onclick = async () => { const a = ads.find(x => x.uid === b.dataset.fd); if (!a || a.tainted){ toast('Esta foto no se puede descargar'); return; } const bl = await adBlob(a, formato); if (bl) save(`anuncio-${a.id}-${formato.replace(':','x')}.png`, bl); });
+    g.querySelectorAll('[data-fq]').forEach(b => b.onclick = () => { const a = ads.find(x => x.uid === b.dataset.fq); if (a){ a.fav = false; renderAll(); persist(); toast('Quitado de favoritos'); } });
+  }
+  function renderStage(){
+    const a = current(); $('#empty').hidden = !!a; $('#post').hidden = !a; $('#post').className = 'post ' + ({'4:5':'ig','1:1':'fb','9:16':'st'})[formato]; if (!a) return;
+    const cv = $('#cv'), H = FORMATOS[formato].h; if (cv.height !== H) cv.height = H;
+    imgFor(a, () => draw(cv, a)); draw(cv, a);
+    const d = data(); $('#pHandle').textContent = d.tienda.replace(/^@/, ''); $('#pHandle2').textContent = d.tienda.replace(/^@/, '');
+    $('#pTitle').textContent = a.title; $('#pBtn').textContent = a.button; $('#pText').textContent = a.primary;
+    const av = $('#av'); av.innerHTML = logo ? `<img src="${logo.src}" alt="">` : esc((d.marca || 'T').slice(0, 1).toUpperCase());
+  }
+  let ctab = 'foto';
+  function renderCtrl(){
+    const a = current(), c = $('#ctrl'); c.hidden = !a; if (!a) return;
+    const field = (k, lab, ta) => ta ? `<label class="f">${lab}<textarea data-e="${k}" rows="2">${esc(a[k])}</textarea></label>` : `<label class="f">${lab}<input data-e="${k}" value="${esc(a[k])}"></label>`;
+    const st = {cola:'en cola', cargando:'creándose…', ok:'lista', error:'falló', propia:'propia'}[a.imgState] || 'sin foto';
+    c.innerHTML = `
+      <div class="meta-top"><span class="pill ${a.enfoque}">${a.enfoque}</span><span class="hint">Tanda ${a.tanda} · ${({ia:'texto con IA', manual:'tu texto', plantilla:'texto de plantilla'})[a.source] || ''} · foto ${st}</span></div>
+      <h2>${esc(a.id)} · ${esc(a.nombre)}</h2>
+      <div class="row" style="margin:8px 0 2px"><button class="btn sm" type="button" data-act="fav" aria-pressed="${!!a.fav}">${a.fav ? '★ Favorito' : '☆ Marcar favorito'}</button><button class="btn sm" type="button" data-act="dup">Duplicar</button><button class="btn sm" type="button" data-act="del">Eliminar</button></div>
+      <p class="hip">${esc(a.hip)}</p>
+      ${a.imgState === 'error' ? `<p class="status err" style="margin:0 0 12px">No se pudo crear la foto: ${esc(a.imgErr || 'sin respuesta')}</p>` : ''}
+      <div class="ctabs" role="tablist" aria-label="Qué querés cambiar">${[['foto','Foto'],['texto','Texto'],['diseno','Diseño'],['producto','Producto'],['meta','Meta']].map(([v, t]) => `<button type="button" role="tab" data-ct="${v}" aria-selected="${ctab === v}">${t}</button>`).join('')}</div>
+      <div class="row" data-tabrow="foto"><button class="btn accent sm" type="button" data-act="foto">${ICON.img}Otra foto</button><button class="btn sm" type="button" data-act="texto">${ICON.txt}Otro texto</button><label class="btn sm upl">${ICON.up}Subir foto<input type="file" accept="image/*" data-act="subir"></label></div>
+      <div class="group" data-tab="foto"><span class="glab">Foto de este anuncio</span>
+        <p class="hint" style="margin:-4px 0 0">Elegí cómo querés la foto de ESTE anuncio y tocá "Crear foto con estas opciones".</p>
+        ${[['tipofoto','Tipo de foto'],['escena','Escena'],['fondo','Color de fondo'],['foto','Estilo de foto'],['edad','Edad'],['rulo','Tipo de rulo'],['piel','Tono de piel'],['genero','Quiénes aparecen'],['personas','Cuántas personas'],['pote','Pote genérico']].map(([k, n]) => `<div class="f" style="gap:6px"><span>${n}</span><div class="opt">${OPTS[k].items.filter(([v]) => !(['tipofoto','escena','fondo'].includes(k) && v.startsWith('variad'))).map(([v, t]) => `<button type="button" data-po="${k}" data-v="${v}" aria-pressed="${(a.op || opt)[k] === v}">${k === 'fondo' && fondoInfo(v, true) ? `<b style="background:${fondoInfo(v)[0]}"></b>` : ''}${t}</button>`).join('')}</div></div>`).join('')}
+        <button class="btn accent sm" type="button" data-act="foto2">${ICON.img}Crear foto con estas opciones</button>
+        <label class="f">Qué hace la persona de la foto <span class="hint">en inglés; cambialo y tocá "Otra foto"</span><textarea data-e="idea" rows="2">${esc(a.idea)}</textarea></label>
+        <button class="btn sm" type="button" data-act="reset">Volver al texto original</button>
+      </div>
+      <div class="group" data-tab="diseno"><span class="glab">Estilo del texto</span>
+        <div class="styles">${[['pop','Marcador','s-po'],['banda','Banda','s-ba'],['editorial','Editorial','s-ed'],['centrado','Centrado','s-ce'],['impacto','Impacto','s-im'],['tarjeta','Tarjeta','s-ta']].map(([v, n, cl]) => `<button type="button" class="${cl}" data-lay="${v}" aria-pressed="${a.layout === v}"><i></i>${n}</button>`).join('')}</div>
+        ${a.layout === 'pop' ? `<div class="f" style="gap:6px"><span>Diseño del titular</span><div class="opt">${[[0,'A mano subrayado'],[1,'Bloques de color'],[2,'Elegante con círculo'],[3,'A mano a la derecha']].map(([v, t]) => `<button type="button" data-pv="${v}" aria-pressed="${(a.popVar || 0) % 4 === v}">${t}</button>`).join('')}</div></div>` : ''}
+        <div class="f" style="gap:6px"><span>Tipografía</span><div class="opt">${FONT_KEYS.map(k => `<button type="button" data-font="${k}" aria-pressed="${a.font === k}" style="font-family:${FONTS[k].f.replace(/"/g, "'")};font-weight:${FONTS[k].w};font-size:15px">${FONTS[k].n}</button>`).join('')}</div></div>
+        <div><span class="glab" style="display:block;margin-bottom:8px">Color</span><div class="sw">${OPTS.acento.items.map(([v, n]) => `<button type="button" data-acc="${v}" aria-label="${n}" aria-pressed="${a.acc === v}" style="background:${v}"></button>`).join('')}<label class="cw" title="Elegir cualquier color"><span class="wheel"></span>Otro<input type="color" data-acccw value="${/^#[0-9a-f]{6}$/i.test(a.acc || '') ? a.acc : '#7A5AF8'}"></label></div></div>
+      </div>
+      <div class="group" data-tab="texto"><span class="glab">Textos de la imagen</span>
+        ${field('h', 'Titular', true)}${field('s', 'Bajada', true)}
+        <div class="two">${field('tag', 'Etiqueta')}${field('cta', 'Botón')}</div>
+        <label class="tog">Mostrar sello de precio<input type="checkbox" data-t="showPrice" ${a.showPrice ? 'checked' : ''} ${a.kind === 'price' ? '' : 'disabled'}></label>
+        <label class="tog">Mostrar marca (Salon Line / logo)<input type="checkbox" data-t="showLogo" ${a.showLogo ? 'checked' : ''}></label>
+      </div>
+      <div class="group" data-tab="foto"><span class="glab">Ajustes de foto</span>
+        <div class="opt">${[['natural','Natural'],['luminoso','Luminoso'],['calido','Cálido'],['vibrante','Vibrante'],['suave','Suave'],['frio','Frío']].map(([v, t]) => `<button type="button" data-preset="${v}">${t}</button>`).join('')}</div>
+        ${[['brillo','Brillo',-40,40,'%'],['contraste','Contraste',-40,40,'%'],['satur','Saturación',-60,60,'%'],['calidez','Calidez (tono)',-60,60,''],['vineta','Viñeta',0,100,''],['zoom','Zoom',100,170,'%'],['posY','Encuadre vertical',0,100,'']].map(([k, n, mn, mx, u]) => { const v = (a.fx || {})[k] != null ? a.fx[k] : (k === 'zoom' ? 100 : k === 'posY' ? (a.layout === 'pop' ? 35 : 50) : 0); return `<label class="rng"><span>${n}</span><input type="range" min="${mn}" max="${mx}" value="${v}" data-fx="${k}"><output>${v}${u}</output></label>`; }).join('')}
+        <label class="rng"><span>Tamaño del titular</span><input type="range" min="75" max="130" value="${Math.round((a.hScale || 1) * 100)}" data-hs="1"><output>${Math.round((a.hScale || 1) * 100)}%</output></label>
+        <div class="row"><button class="btn sm" type="button" data-act="fxreset">Restablecer</button><button class="btn sm" type="button" data-act="fxall">Aplicar a todos</button></div>
+      </div>
+      <div class="group" data-tab="producto"><span class="glab">Producto en este anuncio</span>
+        <div class="f" style="gap:6px"><span>Cómo aparece</span><div class="opt">${OPTS.prodModo.items.map(([v, t]) => `<button type="button" data-po="prodModo" data-v="${v}" aria-pressed="${((a.op || opt).prodModo || 'mano') === v}">${t}</button>`).join('')}</div></div>
+        ${(a.op || opt).prodModo !== 'pegar' && prods.length && !key() ? '' : ''}
+        ${a.integrado ? '<p class="hint" style="margin:0">Esta foto ya tiene el producto integrado por la IA.</p>' : ''}
+        ${prods.length ? `<div class="f" style="gap:6px"><span>Producto</span><div class="opt">${prods.map(pp => `<button type="button" data-prodid="${pp.id}" aria-pressed="${((a.prodId || prodDef) === pp.id)}">${esc(pp.name)}</button>`).join('')}</div></div>
+        <label class="tog">Mostrar mi producto<input type="checkbox" data-t="showProd" ${a.showProd !== false ? 'checked' : ''}></label>
+        <div class="f" style="gap:6px"><span>Posición</span><div class="opt">${[['izq','Izquierda'],['der','Derecha']].map(([v, t]) => `<button type="button" data-pp="prodPos" data-v="${v}" aria-pressed="${(a.prodPos || 'der') === v}">${t}</button>`).join('')}</div></div>
+        <div class="f" style="gap:6px"><span>Tamaño</span><div class="opt">${[['S','Chico'],['M','Mediano'],['L','Grande']].map(([v, t]) => `<button type="button" data-pp="prodSize" data-v="${v}" aria-pressed="${(a.prodSize || 'M') === v}">${t}</button>`).join('')}</div></div>` : '<p class="hint" style="margin:0">Subí tus productos en el panel izquierdo (sección Producto) y elegí cuál va en cada anuncio.</p>'}
+        ${a.enfoque === 'urgencia' || a.kind === 'deadline' || a.kind === 'stock' ? `<label class="f">Frase de urgencia<input data-e="band" value="${esc(a.band || (a.kind === 'stock' ? '¡Últimas unidades!' : '¡No te la pierdas!'))}"></label>` : ''}
+        <div class="f" style="gap:6px"><span>Enfoque</span><div class="opt">${['precio','calidad','urgencia'].map(v => `<button type="button" data-enf="${v}" aria-pressed="${a.enfoque === v}">${v[0].toUpperCase() + v.slice(1)}</button>`).join('')}</div></div>
+        <div class="f" style="gap:6px"><span>Elemento destacado</span><div class="opt">${[['price','Sello de precio'],['checks','Íconos de beneficios'],['deadline','Fecha límite'],['stock','Stock'],['none','Ninguno']].map(([v, t]) => `<button type="button" data-kind="${v}" aria-pressed="${a.kind === v}">${t}</button>`).join('')}</div></div>
+      </div>
+      <div class="group" data-tab="meta"><span class="glab">Textos para Meta</span>
+        ${field('primary', 'Texto principal', true)}${field('title', 'Título')}
+        <label class="f">Botón debajo del anuncio <span class="hint">lo pone Meta abajo de la foto; solo se elige de esta lista</span><select data-e="button">${BOTONES.map(b => `<option ${b === a.button ? 'selected' : ''}>${b}</option>`).join('')}</select></label>
+      </div>
+      <div class="group" data-tab="meta"><span class="glab">Chequeo para Meta</span><ul class="chk">${chequeo(a).map(([ok, t]) => `<li class="${ok ? 'ok' : 'wa'}"><b aria-hidden="true">${ok ? '✓' : '!'}</b><span>${esc(t)}</span></li>`).join('')}</ul>
+        <button class="btn sm" type="button" data-act="fmt3">${ICON.dl}Descargar en los 3 formatos</button></div>
+      <div class="stick"><button class="btn dark" type="button" data-act="png">${ICON.dl}Descargar</button><button class="btn" type="button" data-act="copy">${ICON.cp}Copiar textos</button></div>`;
+    const redraw = () => { draw($('#cv'), a); refreshThumb(a); $('#pTitle').textContent = a.title; $('#pBtn').textContent = a.button; $('#pText').textContent = a.primary; persist(); };
+    c.querySelectorAll('[data-e]').forEach(el => el.addEventListener('input', () => { a[el.dataset.e] = el.value; redraw(); }));
+    c.querySelectorAll('[data-t]').forEach(el => el.onchange = () => { a[el.dataset.t] = el.checked; redraw(); });
+    c.querySelectorAll('[data-lay]').forEach(b => b.onclick = () => { a.layout = b.dataset.lay; a.layoutLocked = true; redraw(); renderCtrl(); });
+    c.querySelectorAll('[data-font]').forEach(b => b.onclick = () => { a.font = b.dataset.font; a.fontLocked = true; c.querySelectorAll('[data-font]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); redraw(); });
+    c.querySelectorAll('[data-acc]').forEach(b => b.onclick = () => { a.acc = b.dataset.acc; a.accLocked = true; c.querySelectorAll('[data-acc]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); redraw(); });
+    const tabs = () => { c.querySelectorAll('[data-tab]').forEach(g => g.hidden = g.dataset.tab !== ctab); c.querySelectorAll('[data-tabrow]').forEach(g => g.hidden = g.dataset.tabrow !== ctab); c.querySelectorAll('[data-ct]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.ct === ctab))); };
+    c.querySelectorAll('[data-ct]').forEach(b => b.onclick = () => { ctab = b.dataset.ct; tabs(); }); tabs();
+    { const cw = c.querySelector('[data-acccw]'); if (cw) cw.onchange = () => { a.acc = cw.value; a.accLocked = true; addCustom('acento', cw.value.toLowerCase()); redraw(); renderCtrl(); }; }
+    c.querySelector('[data-act=foto]').onclick = () => otraFoto(a);
+    c.querySelector('[data-act=texto]').onclick = () => otroTexto(a);
+    c.querySelector('[data-act=subir]').onchange = e => { const f = e.target.files && e.target.files[0]; if (f) shrink(f, 1080).then(u => { a.img = u; a.imgEl = null; a.imgState = 'propia'; refresh(a); persist(); toast('Foto subida'); }); };
+    c.querySelectorAll('[data-po]').forEach(b => b.onclick = () => { a.op = Object.assign({}, a.op || opt); a.op[b.dataset.po] = b.dataset.v; if (b.dataset.po === 'fondo' && fondoInfo(b.dataset.v, true)) a.bg = fondoInfo(b.dataset.v)[0]; c.querySelectorAll(`[data-po="${b.dataset.po}"]`).forEach(x => x.setAttribute('aria-pressed', String(x === b))); redraw(); });
+    c.querySelectorAll('[data-prodid]').forEach(b => b.onclick = () => { a.prodId = b.dataset.prodid; a.integrado = false; renderCtrl(); redraw(); toast('Producto cambiado. Tocá "Crear foto con estas opciones" para que la IA lo integre.'); });
+    const PRESETS = {natural:{}, luminoso:{brillo:12, contraste:-4, satur:6}, calido:{calidez:30, satur:8, brillo:4}, vibrante:{satur:35, contraste:12}, suave:{contraste:-15, satur:-12, brillo:8}, frio:{calidez:-28, satur:-5}};
+    c.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => { a.fx = Object.assign({zoom: (a.fx || {}).zoom, posY: (a.fx || {}).posY}, PRESETS[b.dataset.preset]); renderCtrl(); redraw(); });
+    c.querySelectorAll('[data-fx]').forEach(el => el.addEventListener('input', () => { a.fx = Object.assign({}, a.fx); a.fx[el.dataset.fx] = Number(el.value); el.nextElementSibling.textContent = el.value + (['brillo','contraste','satur','zoom'].includes(el.dataset.fx) ? '%' : ''); redraw(); }));
+    c.querySelector('[data-hs]').addEventListener('input', e => { a.hScale = Number(e.target.value) / 100; e.target.nextElementSibling.textContent = e.target.value + '%'; redraw(); });
+    c.querySelector('[data-act=fxreset]').onclick = () => { a.fx = {}; a.hScale = 1; renderCtrl(); redraw(); };
+    c.querySelector('[data-act=fxall]').onclick = () => { ads.forEach(x => { if (x !== a){ x.fx = Object.assign({}, a.fx, {posY: (x.fx || {}).posY}); x.hScale = a.hScale; } }); renderStrip(); persist(); toast('Ajustes aplicados a todos los anuncios'); };
+    c.querySelectorAll('[data-pv]').forEach(b => b.onclick = () => { a.popVar = Number(b.dataset.pv); c.querySelectorAll('[data-pv]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); redraw(); });
+    c.querySelector('[data-act=foto2]').onclick = () => { a.seed = Math.floor(Math.random() * 1e9); queueImage(a); toast('Creando la foto de ' + a.id + ' con tus opciones…'); };
+    c.querySelectorAll('[data-pp]').forEach(b => b.onclick = () => { a[b.dataset.pp] = b.dataset.v; c.querySelectorAll(`[data-pp="${b.dataset.pp}"]`).forEach(x => x.setAttribute('aria-pressed', String(x === b))); redraw(); });
+    c.querySelectorAll('[data-enf]').forEach(b => b.onclick = () => { a.enfoque = b.dataset.enf; renderCtrl(); renderStrip(); redraw(); });
+    c.querySelectorAll('[data-kind]').forEach(b => b.onclick = () => { a.kind = b.dataset.kind; renderCtrl(); redraw(); });
+    c.querySelector('[data-act=fmt3]').onclick = async () => { if (a.tainted){ toast('Esta foto no se puede descargar sin clave'); return; } for (const f of ['1:1','4:5','9:16']){ const b = await adBlob(a, f); if (b) save(`anuncio-${a.id}-${f.replace(':','x')}.png`, b); await sleep(700); } };
+    c.querySelector('[data-act=fav]').onclick = () => { a.fav = !a.fav; renderCtrl(); renderStrip(); renderFavs(); persist(); toast(a.fav ? 'Guardado en Mis favoritos (abajo de todo)' : 'Quitado de favoritos'); };
+    c.querySelector('[data-act=dup]').onclick = () => { const n = JSON.parse(JSON.stringify(Object.assign({}, a, {imgEl: undefined}))); n.uid = uid(); n.id = a.id + 'b'; n.op = Object.assign({}, a.op); ads.splice(ads.indexOf(a) + 1, 0, n); sel = n.uid; renderAll(); persist(); toast('Duplicado: cambiá lo que quieras en ' + n.id); };
+    c.querySelector('[data-act=del]').onclick = () => { const i = ads.indexOf(a); ads.splice(i, 1); sel = (ads[i] || ads[i - 1] || {}).uid || null; renderAll(); persist(); toast('Anuncio eliminado'); };
+    c.querySelector('[data-act=reset]').onclick = () => { Object.assign(a, JSON.parse(a.orig)); renderAll(); persist(); toast('Volvió al texto original'); };
+    c.querySelector('[data-act=png]').onclick = () => { if (a.tainted){ toast('Esta foto no se puede descargar: tocá "Otra foto" para crearla de nuevo'); return; } const out = document.createElement('canvas'); out.width = 1080; out.height = FORMATOS[formato].h; draw(out, a);
+      try { out.toBlob(b => b ? save(`anuncio-${a.id}-t${a.tanda}-${formato.replace(':','x')}.png`, b) : toast('No se pudo exportar la imagen'), 'image/png'); } catch { toast('No se pudo exportar la imagen'); } };
+    c.querySelector('[data-act=copy]').onclick = () => copy(`Texto principal: ${a.primary}\nTítulo: ${a.title}\nBotón: ${a.button}`);
+  }
+  function chequeo(a){
+    const r = [], d = data(), ph = /\[[^\]]*\]/;
+    r.push([(a.title || '').length <= 40, `Título para Meta: ${(a.title || '').length}/40 caracteres`]);
+    r.push([(a.primary || '').length <= 125, `Texto principal: ${(a.primary || '').length}/125 caracteres (más largo se corta con "Ver más")`]);
+    r.push([(a.h || '').split(/\s+/).filter(Boolean).length <= 8, 'Titular de la imagen corto (ideal hasta 8 palabras)']);
+    r.push([!ph.test([a.h, a.s, a.primary, a.title, a.tag].join(' ')), ph.test([a.h, a.s, a.primary, a.title, a.tag].join(' ')) ? 'Hay datos entre [corchetes] para completar' : 'Sin datos pendientes']);
+    r.push([!!a.img, a.img ? 'Foto lista' : 'Falta la foto']);
+    const hayPromo = !!String(new FormData(form).get('fin') || '').trim();
+    if (a.kind === 'deadline' || a.kind === 'stock') r.push([hayPromo, hayPromo ? 'La urgencia usa una promo cargada' : 'Urgencia sin promo cargada: usala solo si la oferta es real']);
+    if (a.kind === 'price') r.push([d.O.indexOf('[') < 0, 'Precio cargado en el sello']);
+    r.push([a.showLogo !== false, 'Marca visible en el anuncio']);
+    return r;
+  }
+  async function adBlob(a, fmt){
+    await new Promise(res => { if (!a.img || a.imgEl) return res(); imgFor(a, res); setTimeout(res, 1500); });
+    const prev = formato; formato = fmt; const out = document.createElement('canvas'); out.width = 1080; out.height = FORMATOS[fmt].h;
+    try { draw(out, a); } finally { formato = prev; }
+    return new Promise(res => { try { out.toBlob(b => res(b), 'image/png'); } catch { res(null); } });
+  }
+  function loadZip(){ return new Promise((res, rej) => { if (window.JSZip) return res(window.JSZip); const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; sc.onload = () => res(window.JSZip); sc.onerror = rej; document.head.appendChild(sc); }); }
+  function renderCmp(){
+    const opts = ads.map(a => `<option value="${a.uid}">${a.fav ? '★ ' : ''}${esc(a.id)} · ${esc(a.h).slice(0, 40)}</option>`).join('');
+    ['A','B'].forEach(k => { const sl = $('#cmp' + k), v = sl.value; sl.innerHTML = opts; if (v) sl.value = v; });
+    const H = FORMATOS[formato].h;
+    ['A','B'].forEach(k => { const a = ads.find(x => x.uid === $('#cmp' + k).value); const cv = $('#cmpCv' + k); cv.height = Math.round(540 * H / 1080); if (!a) return; imgFor(a, () => draw(cv, a)); draw(cv, a); $('#cmpT' + k).textContent = `${a.enfoque.toUpperCase()} · ${a.primary}`; });
+  }
+  function renderStrip(){
+    const s = $('#strip'); s.hidden = !ads.length; const film = $('#film'); film.innerHTML = '';
+    let last = null; const H = FORMATOS[formato].h;
+    ads.filter(a => filtro === 'todos' || (filtro === 'fav' ? a.fav : a.enfoque === filtro)).forEach(a => {
+      if (a.tanda !== last){ last = a.tanda; const l = document.createElement('div'); l.className = 'tlab'; l.textContent = 'Tanda ' + a.tanda; film.appendChild(l); }
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'th'; b.dataset.uid = a.uid; b.setAttribute('aria-current', String(a.uid === (current() || {}).uid));
+      b.setAttribute('aria-label', `${a.id}: ${a.h}`);
+      b.innerHTML = `<canvas width="264" height="${Math.round(264 * H / 1080)}"></canvas><span><i class="i-${a.enfoque}"></i>${a.fav ? '★ ' : ''}${esc(a.id)} · ${esc(a.nombre)}</span>`;
+      const cv = b.querySelector('canvas'); imgFor(a, () => draw(cv, a)); draw(cv, a);
+      b.onclick = () => { sel = a.uid; renderStage(); renderCtrl(); film.querySelectorAll('.th').forEach(x => x.setAttribute('aria-current', String(x === b))); if (window.innerWidth < 900) $('#post').scrollIntoView({behavior:'smooth', block:'start'}); };
+      film.appendChild(b);
+    });
+  }
+  function renderCollage(){
+    const spans = $$('#collage span'), withImg = ads.filter(a => a.img).slice(0, 4);
+    spans.forEach((sp, i) => { sp.style.backgroundImage = withImg[i] ? `url(${withImg[i].img})` : ''; });
+  }
+  function refreshThumb(a){ const b = $(`#film [data-uid="${a.uid}"] canvas`); if (b){ imgFor(a, () => draw(b, a)); draw(b, a); } const f = $(`#favsG [data-uid="${a.uid}"] canvas`); if (f){ imgFor(a, () => draw(f, a)); draw(f, a); } }
+  function refresh(a){ refreshThumb(a); if ((current() || {}).uid === a.uid){ renderStage(); const h = $('#ctrl .meta-top .hint'); if (h){ const st = {cola:'en cola', cargando:'creándose…', ok:'lista', error:'falló', propia:'propia'}[a.imgState] || 'sin foto'; h.textContent = `Tanda ${a.tanda} · ${({ia:'texto con IA', manual:'tu texto', plantilla:'texto de plantilla'})[a.source] || ''} · foto ${st}`; } } renderCollage(); }
+  function toast(t){ const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2600); }
+  async function copy(text){ try { await navigator.clipboard.writeText(text); toast('Textos copiados'); } catch { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast('Textos copiados'); } catch { toast('No se pudo copiar'); } ta.remove(); } }
+  function save(name, blob){ const u = URL.createObjectURL(blob instanceof Blob ? blob : new Blob([blob])), l = document.createElement('a'); l.href = u; l.download = name; document.body.appendChild(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(u), 3000); toast('Descargado: ' + name); }
+  function csv(){
+    if (!ads.length){ toast('Todavía no hay anuncios'); return; }
+    const q = v => '"' + String(v == null ? '' : v).replace(/ /g, ' ').replace(/"/g, '""') + '"';
+    const rows = [['Tanda','Anuncio','Enfoque','Ángulo','Titular','Texto principal','Título','Botón','Hipótesis']].concat(ads.map(a => [a.tanda, a.id, a.enfoque, a.nombre, a.h, a.primary, a.title, a.button, a.hip]));
+    save(`anuncios-${ads.length}.csv`, '﻿' + rows.map(r => r.map(q).join(',')).join('\n'));
+  }
+
+  // ---------- Guardado en el navegador ----------
+  const KEY = 'ads-infinitos-estudio-v1';
+  function persist(){
+    try {
+      const vals = {}; new FormData(form).forEach((v, k) => { if (typeof v === 'string') vals[k] = v; });
+      const imgs = {}, slim = ads.map(a => { const o = Object.assign({}, a); delete o.imgEl; if (o.img){ const k = 'i' + o.img.length + o.img.slice(-24); imgs[k] = o.img; o.img = '@' + k; } return o; });
+      const enf = enfoques(), base = {vals, opt, formato, tandas, sel, enf, custom, pkey: serverMode ? '' : key()};
+      try { localStorage.setItem(KEY, JSON.stringify(Object.assign({}, base, {ads: slim, imgs}))); }
+      catch { slim.forEach(o => delete o.img); localStorage.setItem(KEY, JSON.stringify(Object.assign({}, base, {ads: slim, imgs: {}}))); if (!persist.w){ persist.w = true; toast('Se llenó la memoria del navegador: las fotos viejas no se guardan'); } }
+    } catch {}
+  }
+  function restore(){
+    try {
+      const st = JSON.parse(localStorage.getItem(KEY) || 'null'); if (!st) return;
+      Object.entries(st.vals || {}).forEach(([k, v]) => { const el = form.elements[k]; if (el && el.type !== 'file') el.value = v; });
+      Object.entries(st.custom || {}).forEach(([k, arr]) => (arr || []).forEach(v => addCustom(k, v, true)));
+      Object.assign(opt, st.opt || {}); Object.keys(OPTS).forEach(k => { if (!OPTS[k].items.some(([v]) => v === opt[k])) opt[k] = OPTS[k].def; }); formato = FORMATOS[st.formato] ? st.formato : '1:1'; tandas = st.tandas || 0; sel = st.sel || null;
+      if (Array.isArray(st.enf)) $$('#enfoques input').forEach(i => i.checked = st.enf.includes(i.value));
+      $('#pkey').value = st.pkey || '';
+      ads = (st.ads || []).map((o, i) => { if (!FONTS[o.font]) o.font = fontFor(i, o.tanda || 0);  if (typeof o.img === 'string' && o.img[0] === '@'){ const u = (st.imgs || {})[o.img.slice(1)]; if (u) o.img = u; else delete o.img; } return o; });
+    } catch {}
+  }
+
+  // ---------- Eventos ----------
+  var stepNow = 1;
+  function showStep(n){
+    if (n === 4 && !['variado','modelo'].includes(opt.tipofoto)) n = stepNow > 4 ? 3 : 5;
+    stepNow = n;
+    $$('.step').forEach(st => st.hidden = Number(st.dataset.step) !== n);
+    if (n === 6) renderResumen();
+    placeGen();
+    $$('.steps [data-go]').forEach(b => { if (Number(b.dataset.go) === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  }
+  $$('[data-go]').forEach(b => b.onclick = () => { showStep(Number(b.dataset.go)); if (!b.closest('.steps')) $('.steps').scrollIntoView({behavior:'smooth', block:'nearest'}); });
+  setTimeout(placeGen, 0);
+  function placeGen(){
+    const ga = $('#genArea'), box = [$('#btnPlan'), $('#planInfo'), $('#btnGen'), $('#btnStop')];
+    if (stepNow === 6) box.forEach(el => ga.appendChild(el)); else box.forEach(el => $('.brief').appendChild(el));
+    const show = stepNow === 6 || ads.length > 0; box.forEach(el => { if (el.id !== 'btnStop') el.style.display = show ? '' : 'none'; });
+  }
+  function renderResumen(){
+    const fd = new FormData(form), g = k => String(fd.get(k) || '').trim(), lab = (k) => { const it = OPTS[k].items.find(([v]) => v === opt[k]); return it ? it[1] : opt[k]; };
+    const per = ['variado','modelo'].includes(opt.tipofoto) ? `${lab('genero')} · ${lab('personas')}` : 'Sin personas';
+    const rows = [['Producto', `${g('marca')} ${g('producto')} ${g('tam')}`, 1], ['Precio', `$ ${g('oferta') || g('lista')}`, 1], ['Enfoques', enfoques().join(', '), 2], ['Textos', lab('textos'), 2], ['Anuncios', opt.cantidad, 2],
+      ['Foto', `${lab('tipofoto')} · ${lab('escena')}`, 3], ['Fondo', lab('fondo'), 3], ['Personas', per, 4], ['Estilo', lab('layout'), 5], ['Letra', lab('tipo'), 5], ['Color', lab('acento'), 5]];
+    $('#resumen').innerHTML = rows.map(([k, v, st]) => `<div><b>${k}</b><span>${esc(v)}<button type="button" data-goedit="${st}">Cambiar</button></span></div>`).join('');
+    $$('#resumen [data-goedit]').forEach(b => b.onclick = () => showStep(Number(b.dataset.goedit)));
+  }
+  $('#btnGen').onclick = () => generar();
+  $('#btnStop').onclick = () => busy && busy.abort();
+  $('#btnTest').onclick = async () => {
+    const out = $('#testOut'), btn = $('#btnTest'); out.hidden = false; btn.disabled = true; out.innerHTML = 'Probando la IA de texto…';
+    let txt = '', img = '';
+    try { const r = await aiText('Respondé solo con este JSON: {"ok": true}', null, 40000); txt = r && r.ok ? 'Texto: funciona.' : 'Texto: responde, pero raro.'; }
+    catch (e) { txt = 'Texto: ' + (e && e.code === 'limite' ? 'muchos pedidos seguidos, esperá unos segundos.' : e && e.code === 'invalid_json' ? 'responde, pero en otro formato (igual se puede usar).' : 'no conecta.'); }
+    out.innerHTML = esc(txt) + '<br>Probando la IA de imágenes… (puede tardar hasta un minuto)';
+    const k = key(), u = serverMode ? `/api/image/${encodeURIComponent('a red apple on a table, photo')}?width=256&height=256&seed=${Date.now() % 1e6}&model=flux&nologo=true&safe=true` : k ? `https://gen.pollinations.ai/image/${encodeURIComponent('a red apple on a table, photo')}?width=256&height=256&seed=${Date.now() % 1e6}&model=flux&nologo=true&safe=true` : `https://image.pollinations.ai/prompt/${encodeURIComponent('a red apple on a table, photo')}?width=256&height=256&seed=${Date.now() % 1e6}&model=flux&nologo=true`;
+    const r = await loadImage(u);
+    if (r.data || r.remote) img = `Imágenes: funcionan${r.remote ? ' (pero no se podrán descargar)' : ''}.<br><img src="${esc(r.data || r.remote)}" alt="Imagen de prueba" style="width:96px;height:96px;border-radius:10px;margin-top:6px">`;
+    else if (r.retry) img = `Imágenes: muchos pedidos seguidos (código ${r.code}). Esperá ${r.retry} segundos.`;
+    else if (r.fatal) img = `Imágenes: la IA rechazó el pedido (código ${r.code}). Revisá que la clave esté bien copiada.`;
+    else img = 'Imágenes: no funcionan (' + esc(r.err || 'sin respuesta') + '). Revisá la clave.';
+    out.innerHTML = esc(txt) + '<br>' + img; btn.disabled = false;
+  };
+  $('#pkey').addEventListener('change', () => { persist(); toast('Clave guardada en este navegador'); });
+  $('#btnCsv').onclick = csv;
+  const openPlan = () => { renderPlan(); $('#planDlg').showModal(); };
+  $('#btnPlan').onclick = openPlan;
+  $$('.plat').forEach(b => b.onclick = () => { const f = b.dataset.goto, t = $$('#fmt button').find(x => x.dataset.f === f); if (t) t.click(); $('#estudio').scrollIntoView({behavior:'smooth'}); });
+  $('#planClose').onclick = () => $('#planDlg').close();
+  $('#planOn').onchange = e => { planOn = e.target.checked; savePlan(); };
+  $('#planCopy').onclick = () => { ensurePlan(); plan = plan.map(() => Object.assign({}, plan[0])); planOn = true; renderPlan(); savePlan(); };
+  $('#planClear').onclick = () => { plan = []; ensurePlan(); renderPlan(); savePlan(); };
+  $('#planGo').onclick = () => { planOn = true; savePlan(); $('#planDlg').close(); generar(); $('#estudio').scrollIntoView({behavior:'smooth'}); };
+  try { const pst = JSON.parse(localStorage.getItem('ads-plan') || 'null'); if (pst){ plan = pst.plan || []; planOn = !!pst.planOn; } } catch {}
+  setTimeout(planInfo, 0);
+  if (location.protocol.startsWith('http')) fetch('/api/status', {cache: 'no-store'}).then(r => r.ok ? r.json() : null).then(j => {
+    if (j && j.hasKey){ serverMode = true; $('#keyBox').hidden = true; renderCtrl(); }
+  }).catch(() => {});
+  $('#btnCmp').onclick = () => {
+    if (ads.length < 2){ toast('Necesitás al menos 2 anuncios'); return; }
+    const favs = ads.filter(a => a.fav), pick2 = favs.length >= 2 ? favs : ads;
+    renderCmp(); $('#cmpA').value = pick2[0].uid; $('#cmpB').value = pick2[1].uid; renderCmp(); $('#cmp').showModal();
+  };
+  $('#cmpClose').onclick = () => $('#cmp').close();
+  $('#btnFavCmp').onclick = () => $('#btnCmp').click();
+  $('#btnFavDl').onclick = () => { if (!ads.some(a => a.fav)){ toast('Todavía no hay favoritos'); return; } $('#btnDlFav').click(); };
+  $('#cmpA').onchange = renderCmp; $('#cmpB').onchange = renderCmp;
+  $('#btnZip').onclick = async () => {
+    const list = ads.filter(a => a.fav).length ? ads.filter(a => a.fav) : ads; if (!list.length){ toast('Todavía no hay anuncios'); return; }
+    toast(`Armando el ZIP con ${list.length} anuncios…`);
+    try {
+      const Z = await loadZip(), zip = new Z();
+      for (const a of list){ if (a.tainted) continue; const b = await adBlob(a, formato); if (b) zip.file(`anuncio-${a.id}-t${a.tanda}-${formato.replace(':','x')}.png`, b); }
+      const q = v => '"' + String(v == null ? '' : v).replace(/\u00A0/g, ' ').replace(/"/g, '""') + '"';
+      zip.file('textos-para-meta.csv', '\uFEFF' + [['Anuncio','Enfoque','Ángulo','Titular','Texto principal','Título','Botón','Hipótesis']].concat(list.map(a => [a.id, a.enfoque, a.nombre, a.h, a.primary, a.title, a.button, a.hip])).map(r => r.map(q).join(',')).join('\n'));
+      save(`anuncios-salonline-${list.length}.zip`, await zip.generateAsync({type:'blob'}));
+    } catch (e) { toast('No se pudo armar el ZIP; uso "Descargar favoritos"'); }
+  };
+  $('#btnDlFav').onclick = async () => {
+    const favs = ads.filter(a => a.fav); if (!favs.length){ toast('Marcá anuncios con ☆ para descargarlos juntos'); return; }
+    for (const a of favs){ if (a.tainted) continue; await new Promise(res => imgFor(a, res) || setTimeout(res, 50)); const out = document.createElement('canvas'); out.width = 1080; out.height = FORMATOS[formato].h; draw(out, a);
+      await new Promise(res => out.toBlob(b => { if (b) save(`anuncio-${a.id}-t${a.tanda}-${formato.replace(':','x')}.png`, b); setTimeout(res, 700); }, 'image/png')); }
+  };
+  $('#btnReset').onclick = () => { try { localStorage.removeItem(KEY); } catch {} location.reload(); };
+  $$('#fmt button').forEach(b => b.onclick = () => { formato = b.dataset.f; $$('#fmt button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); renderAll(); persist(); });
+  $$('[data-fil]').forEach(b => b.onclick = () => { filtro = b.dataset.fil; $$('[data-fil]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); renderStrip(); });
+  let tmr; form.addEventListener('input', e => { if (e.target.type === 'file') return; clearTimeout(tmr); tmr = setTimeout(() => { renderStage(); renderStrip(); persist(); }, 300); });
+  form.addEventListener('submit', e => e.preventDefault());
+  $('#enfoques').addEventListener('change', persist);
+  function quitarFondo(im){
+    const max = 900, k = Math.min(1, max / Math.max(im.width, im.height)), w = Math.round(im.width * k), h = Math.round(im.height * k);
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.drawImage(im, 0, 0, w, h);
+    const id = x.getImageData(0, 0, w, h), d = id.data, at = (px, py) => (py * w + px) * 4;
+    const corners = [[0,0],[w-1,0],[0,h-1],[w-1,h-1],[w>>1,0],[w>>1,h-1],[0,h>>1],[w-1,h>>1]].map(([px,py]) => at(px,py));
+    if (corners.some(o => d[o + 3] < 20)) return {url: c.toDataURL('image/png'), quitado: false};
+    const bg = [0,1,2].map(ch => corners.reduce((sum, o) => sum + d[o + ch], 0) / corners.length);
+    const spread = Math.max(...corners.map(o => Math.abs(d[o] - bg[0]) + Math.abs(d[o+1] - bg[1]) + Math.abs(d[o+2] - bg[2])));
+    if (spread > 90 || (bg[0] + bg[1] + bg[2]) / 3 < 170) return {url: c.toDataURL('image/png'), quitado: false};
+    const dist = o => Math.abs(d[o] - bg[0]) + Math.abs(d[o+1] - bg[1]) + Math.abs(d[o+2] - bg[2]);
+    const tol = 70, seen = new Uint8Array(w * h), stack = [];
+    for (let px = 0; px < w; px++){ stack.push(px, 0, px, h - 1); } for (let py = 0; py < h; py++){ stack.push(0, py, w - 1, py); }
+    while (stack.length){ const py = stack.pop(), px = stack.pop(); if (px < 0 || py < 0 || px >= w || py >= h) continue; const n = py * w + px; if (seen[n]) continue; const o = n * 4; if (dist(o) > tol) continue; seen[n] = 1; d[o + 3] = 0; stack.push(px + 1, py, px - 1, py, px, py + 1, px, py - 1); }
+    // borde suave
+    for (let py = 1; py < h - 1; py++) for (let px = 1; px < w - 1; px++){ const n = py * w + px; if (seen[n]) continue; if (seen[n-1] || seen[n+1] || seen[n-w] || seen[n+w]){ const o = n * 4, dd = dist(o); if (dd < tol * 2) d[o + 3] = Math.min(d[o + 3], Math.round(255 * (dd - tol) / tol)); } }
+    x.putImageData(id, 0, 0);
+    let x0 = w, y0 = h, x1 = 0, y1 = 0; for (let py = 0; py < h; py++) for (let px = 0; px < w; px++) if (d[at(px, py) + 3] > 20){ if (px < x0) x0 = px; if (px > x1) x1 = px; if (py < y0) y0 = py; if (py > y1) y1 = py; }
+    if (x1 <= x0 || y1 <= y0) return {url: c.toDataURL('image/png'), quitado: false};
+    const c2 = document.createElement('canvas'); c2.width = x1 - x0 + 1; c2.height = y1 - y0 + 1; c2.getContext('2d').drawImage(c, x0, y0, c2.width, c2.height, 0, 0, c2.width, c2.height);
+    return {url: c2.toDataURL('image/png'), quitado: true};
+  }
+  function loadProdImgs(){ prods.forEach(pp => { if (!prodImgs[pp.id]){ const im = new Image(); im.onload = () => { prodImgs[pp.id] = im; renderAll(); }; im.src = pp.url; } }); }
+  function saveProds(){ try { localStorage.setItem('ads-prods', JSON.stringify({prods, prodDef})); } catch { toast('No entran más productos en la memoria del navegador: borrá alguno'); } }
+  function renderProds(){
+    const box = $('#prodList'); box.innerHTML = prods.length ? '' : '<p class="hint" style="margin:0">Todavía no subiste productos.</p>';
+    prods.forEach(pp => {
+      const row = document.createElement('div'); row.className = 'prod';
+      row.innerHTML = `<img src="${pp.url}" alt=""><input value="${esc(pp.name)}" aria-label="Nombre del producto"><button type="button" aria-pressed="${pp.id === prodDef}" title="Usar por defecto en los anuncios nuevos">${pp.id === prodDef ? 'Principal' : 'Usar'}</button><button type="button" aria-label="Quitar producto">✕</button>`;
+      row.querySelector('input').oninput = e => { pp.name = e.target.value; saveProds(); renderCtrl(); };
+      const [bUse, bDel] = row.querySelectorAll('button');
+      bUse.onclick = () => { prodDef = pp.id; saveProds(); renderProds(); renderAll(); };
+      bDel.onclick = () => { prods = prods.filter(x => x !== pp); delete prodImgs[pp.id]; if (prodDef === pp.id) prodDef = (prods[0] || {}).id || null; ads.forEach(a => { if (a.prodId === pp.id) a.prodId = null; }); saveProds(); renderProds(); renderAll(); };
+      box.appendChild(row);
+    });
+  }
+  $('#prodFile').addEventListener('change', e => {
+    const files = Array.from(e.target.files || []); if (!files.length) return; let n = 0, quit = 0;
+    files.forEach(f => { const u = URL.createObjectURL(f), im = new Image(); im.onload = () => {
+      const r = quitarFondo(im); URL.revokeObjectURL(u); if (r.quitado) quit++;
+      const pp = {id: 'p' + Math.random().toString(36).slice(2, 8), name: f.name.replace(/\.[^.]+$/, '').slice(0, 40), url: r.url}; prods.push(pp); if (!prodDef) prodDef = pp.id;
+      if (++n === files.length){ opt.pote = 'no'; renderOpts(); saveProds(); loadProdImgs(); renderProds(); persist(); toast(`${n} producto${n > 1 ? 's' : ''} agregado${n > 1 ? 's' : ''}${quit ? ' (le saqué el fondo blanco)' : ''}. Tocá "Otra foto" para que la IA lo integre.`); }
+    }; im.src = u; });
+    e.target.value = '';
+  });
+  try {
+    const st = JSON.parse(localStorage.getItem('ads-prods') || 'null');
+    if (st){ prods = st.prods || []; prodDef = st.prodDef || (prods[0] || {}).id || null; }
+    else { const old = localStorage.getItem('ads-prod'); if (old){ prods = [{id: 'p1', name: 'Producto', url: old}]; prodDef = 'p1'; saveProds(); } }
+  } catch {}
+  renderProds(); loadProdImgs();
+  form.logo.addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (!f) return; const u = URL.createObjectURL(f), im = new Image(); im.onload = () => { logo = im; const t = $('#thumbLogo'); t.src = u; t.hidden = false; renderAll(); }; im.src = u; });
+
+  restore(); renderOpts();
+  $$('#fmt button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.f === formato)));
+  renderAll();
+  ads.filter(a => a.imgState === 'cola' || a.imgState === 'cargando').forEach(queueImage);
+  if (document.fonts){ Promise.all([document.fonts.load(`800 40px 'Plus Jakarta Sans'`), document.fonts.load(`600 40px Fraunces`), document.fonts.load(`400 60px 'Caveat Brush'`), ...FONT_KEYS.map(k => document.fonts.load(`${FONTS[k].w} 60px ${FONTS[k].f}`))]).then(() => renderAll()).catch(() => {}); }
+})();
+</script>
+</body>
+</html>
